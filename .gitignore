@@ -1,0 +1,20 @@
+# Secrets & Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.id_rsa
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node modules
+node_modules/
+package-lock.json
+
+# IDE Files
+.vscode/
+.idea/
