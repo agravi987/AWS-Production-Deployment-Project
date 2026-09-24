@@ -1,140 +1,119 @@
 # 🛡️ Step 2: Layered Security Groups (Zero-Trust Defense)
 
-Welcome to Day 2! 🛡️  
-In this step, you will engineer an **enterprise-grade layered firewall defense**.
+Welcome to **Step 2**! 🛡️  
+In the cloud, firewalls are known as **Security Groups**.  
+A Security Group acts as a **virtual stateful firewall** that controls inbound (ingress) and outbound (egress) traffic at the elastic network interface level.
 
 ---
 
-## 🚫 The Junior Mistake vs. The Senior Architecture
+## 🏰 The Core Security Concept: "Chained" Security Groups
 
-### ❌ The Junior Mistake:
-
-Opening Port 5432 (Postgres) or Port 5000 (Express) to `0.0.0.0/0` (Anywhere).  
-If an attacker discovers your IP address, they can brute-force your database directly!
-
-### The Senior Architecture: Security Group Chaining
-
-Instead of IP addresses, AWS allows you to use a **Security Group as the Source** for another Security Group!
+A common security vulnerability is opening database ports (`5432`) or application ports (`5000`) to the entire world (`0.0.0.0/0`).  
+In enterprise AWS architectures, we implement **Security Group Chaining**:
 
 ```
-                  THE PUBLIC INTERNET 🌐
-                            │
-                            ▼ Allowed: 0.0.0.0/0 (Ports 80 & 443)
-                 ┌──────────────────────┐
-                 │ ⚖️ ALB Security Group │
-                 │      (alb-sg)        │
-                 └──────────┬───────────┘
-                            │
-                            ▼ Allowed ONLY from: "alb-sg" (Ports 80 & 5000)
-                 ┌──────────────────────┐
-                 │ 💻 EC2 Security Group│
-                 │     (ec2-app-sg)     │
-                 └──────────┬───────────┘
-                            │
-                            ▼ Allowed ONLY from: "ec2-app-sg" (Port 5432)
-                 ┌──────────────────────┐
-                 │ 🐘 RDS Security Group│
-                 │     (rds-db-sg)      │
-                 └──────────────────────┘
+THE INTERNET (0.0.0.0/0)
+          │
+          │ Allows HTTP (80) & HTTPS (443) ONLY
+          ▼
+┌──────────────────────────────────────┐
+│  [ALB Security Group: alb-sg]        │ 🌐 Entry Point
+└──────────────────┬───────────────────┘
+                   │
+                   │ Allows Port 80 & 5000 ONLY from [alb-sg]
+                   ▼
+┌──────────────────────────────────────┐
+│  [EC2 Security Group: ec2-app-sg]    │ 💻 Application Fleet
+└──────────────────┬───────────────────┘
+                   │
+                   │ Allows PostgreSQL (5432) ONLY from [ec2-app-sg]
+                   ▼
+┌──────────────────────────────────────┐
+│  [RDS Security Group: rds-db-sg]     │ 🐘 Database Vault
+└──────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
-> **Why this is virtually impenetrable**:
-> Even if someone on the internet discovers the private IP or endpoint of your database, AWS drops their network packets at the hypervisor level. Only traffic originating from inside an authorized EC2 instance can reach the database! 🔒
-
----
-
-## 📋 The 3 Security Groups We Will Create
-
-| Security Group   | Purpose                      | Inbound Rules                                                                                                         | Outbound Rules            |
-| :--------------- | :--------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :------------------------ |
-| **`alb-sg`**     | Front door for Load Balancer | • HTTP (Port 80) from `0.0.0.0/0`<br>• HTTPS (Port 443) from `0.0.0.0/0`                                              | All traffic (`0.0.0.0/0`) |
-| **`ec2-app-sg`** | Application EC2 Servers      | • HTTP (Port 80) from `alb-sg`<br>• Custom TCP (Port 5000) from `alb-sg`<br>• SSH (Port 22) from **My IP** (Optional) | All traffic (`0.0.0.0/0`) |
-| **`rds-db-sg`**  | Amazon RDS Database          | • PostgreSQL (Port 5432) from `ec2-app-sg`                                                                            | All traffic (`0.0.0.0/0`) |
+> **Why is this so powerful?**  
+> Even if an attacker discovers your database endpoint and knows the master password, they **cannot even establish a TCP handshake** from the internet because the database firewall drops their connection instantly!
 
 ---
 
 ## 🖱️ Step-by-Step AWS Management Console Walkthrough
 
-### 1. Create `alb-sg` (Application Load Balancer Firewall)
+### 1. Create `production-alb-sg` (Load Balancer Firewall)
 
-1. Open the [AWS VPC Console](https://console.aws.amazon.com/vpc/).
-2. In the left menu, click **Security Groups** $\rightarrow$ Click **Create security group**.
-3. Basic details:
+1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/).
+2. In the left menu under **Network & Security**, click **Security Groups**.
+3. Click the orange **Create security group** button.
+4. Basic details:
    - **Security group name**: `production-alb-sg`
-   - **Description**: `Allow public HTTP and HTTPS to ALB`
-   - **VPC**: Select your `production-vpc`.
-4. **Inbound rules** $\rightarrow$ Click **Add rule**:
-   - Rule 1: Type: `HTTP` | Port: `80` | Source: `Anywhere-IPv4` (`0.0.0.0/0`).
-   - Rule 2: Type: `HTTPS` | Port: `443` | Source: `Anywhere-IPv4` (`0.0.0.0/0`).
-5. Click **Create security group**.
-6. 📋 Note the generated ID (e.g., `sg-01a2b3c4d5e6f7g8h`).
+   - **Description**: `Allow HTTP and HTTPS ingress from the internet`
+   - **VPC**: Select `production-vpc`.
+5. **Inbound rules** $\rightarrow$ Click **Add rule**:
+   - Rule 1: Type: `HTTP` | Port: `80` | Source: `Anywhere-IPv4` (`0.0.0.0/0`)
+   - Rule 2: Type: `HTTPS` | Port: `443` | Source: `Anywhere-IPv4` (`0.0.0.0/0`)
+6. Click **Create security group**.
 
 ---
 
-### 2. Create `ec2-app-sg` (EC2 Application Firewall)
+### 2. Create `production-ec2-app-sg` (Application Fleet Firewall)
 
 1. Click **Create security group**.
 2. Basic details:
    - **Security group name**: `production-ec2-app-sg`
-   - **Description**: `Allow traffic only from ALB`
+   - **Description**: `Allow application traffic strictly from ALB and SSH/Connect`
    - **VPC**: Select `production-vpc`.
 3. **Inbound rules** $\rightarrow$ Click **Add rule**:
-   - Rule 1: Type: `HTTP` | Port: `80` | Source: In the search box, select `production-alb-sg`!
-   - Rule 2: Type: `Custom TCP` | Port: `5000` | Source: Select `production-alb-sg`!
-   - Rule 3 (Optional for debugging): Type: `SSH` | Port: `22` | Source: Select `My IP` (Only your laptop can connect!).
+   - Rule 1 (HTTP from ALB): Type: `Custom TCP` | Port: `80` | Source: Select **Custom** $\rightarrow$ type `production-alb-sg` and select its SG ID (`sg-xxxx`)!
+   - Rule 2 (API Backend from ALB): Type: `Custom TCP` | Port: `5000` | Source: Select `production-alb-sg`!
+   - Rule 3 (Optional SSH/Troubleshooting): Type: `SSH` | Port: `22` | Source: `My IP` (or EC2 Instance Connect).
 4. Click **Create security group**.
-5. 📋 Note the generated ID.
 
 ---
 
-### 3. Create `rds-db-sg` (Database Firewall)
+### 3. Create `production-rds-db-sg` (Database Firewall)
 
 1. Click **Create security group**.
 2. Basic details:
    - **Security group name**: `production-rds-db-sg`
-   - **Description**: `Allow PostgreSQL only from EC2 app servers`
+   - **Description**: `Allow PostgreSQL strictly from EC2 application servers`
    - **VPC**: Select `production-vpc`.
 3. **Inbound rules** $\rightarrow$ Click **Add rule**:
-   - Rule 1: Type: `PostgreSQL` | Port: `5432` | Source: Select `production-ec2-app-sg`!
+   - Rule 1: Type: `PostgreSQL` | Port: `5432` | Source: Select **Custom** $\rightarrow$ type `production-ec2-app-sg` and select its SG ID!
 4. Click **Create security group**.
 
-🎉 **Your 3-tier firewall chain is complete!**
+🎉 **Your 3-tier firewall defense chain is complete!**
 
 ---
 
 ## 🔍 Checkpoints: How to Verify the Firewall Chain
 
-1. **Verify Source References Security Group IDs (Not 0.0.0.0/0)**:
+1. **Verify Source References Security Group IDs (Not IP addresses)**:
    - Click on `production-ec2-app-sg` $\rightarrow$ **Inbound rules** tab:
-     - Check that the **Source** shows `sg-xxxx (production-alb-sg)` instead of an IP address!
+     - Check that the **Source** column shows `sg-xxxx (production-alb-sg)`.
    - Click on `production-rds-db-sg` $\rightarrow$ **Inbound rules** tab:
-     - Check that the **Source** shows `sg-xxxx (production-ec2-app-sg)`!
-
-2. **Verify Zero Direct Database Exposure**:
-   - Notice that `production-rds-db-sg` has **NO rule** for `0.0.0.0/0`.
-   - Even if someone knows the RDS master password and endpoint, outside network packets are dropped at the hypervisor! 🛡️
+     - Check that the **Source** column shows `sg-xxxx (production-ec2-app-sg)`.
+2. **Verify Zero Direct Public Exposure for Database**:
+   - Confirm that `production-rds-db-sg` has **NO rule** for `0.0.0.0/0`.
+   - Outside network packets are completely rejected at the AWS hypervisor level. 🛡️
 
 ---
 
 ## 📸 Proof of Work: Screenshots
 
-> [!TIP]
-> Save your screenshots into `docs/screenshots/` and update these links:
-
 ### 🖼️ Screenshot 1: ALB Security Group with Public Ingress
-
 ![ALB Security Group with Public Ingress](./screenshots/04-alb-security-group.png)
 
 ### 🖼️ Screenshot 2: EC2 Security Group Chained to ALB SG
-
 ![EC2 Security Group Chained to ALB SG](./screenshots/05-ec2-security-group.png)
 
 ### 🖼️ Screenshot 3: RDS Security Group Chained to EC2 SG
-
 ![RDS Security Group Chained to EC2 SG](./screenshots/06-rds-security-group.png)
 
-## ⏭️ Ready for Day 3?
+---
+
+## ⏭️ Ready for Step 3?
 
 Now let's launch our managed cloud database on Amazon RDS:  
 👉 **[Go to Step 3: 03-rds-database-mastery.md](./03-rds-database-mastery.md)**

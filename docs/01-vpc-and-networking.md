@@ -1,8 +1,8 @@
 # 🌐 Step 1: Virtual Private Cloud (VPC) & Multi-AZ Networking
 
-Welcome to Day 1! 🚀  
-One of the biggest mistakes beginners make in AWS is launching everything into the "Default VPC".  
-In professional cloud engineering, **we build a custom VPC with strict network isolation**.
+Welcome to **Step 1**! 🚀  
+One of the most critical principles in professional cloud engineering is: **Never deploy production systems directly into the AWS Default VPC**.  
+In this step, you will build a isolated **custom Amazon Virtual Private Cloud (VPC)** with public, private application, and private database subnets spanning across **two Availability Zones**.
 
 ---
 
@@ -18,9 +18,9 @@ Think of your cloud infrastructure like a secure medieval castle:
 │   • Internet Gateway (Drawbridge to the outside world 🌍)   │
 │   • Application Load Balancer (Security guards checking IDs)│
 │                                                             │
-│  [PRIVATE RESIDENTIAL DISTRICT] (Inside the Castle Walls)   │
+│  [PRIVATE RESIDENTIAL DISTRICT] (Inside Castle Walls)       │
 │   • EC2 Application Servers (Cooks & Staff)                 │
-│   • Cannot be seen from outside the castle! 🛡️              │
+│   • Cannot be contacted directly from outside the castle!   │
 │                                                             │
 │  [UNDERGROUND VAULT] (Deepest Secret Chamber)               │
 │   • Amazon RDS Database (The Royal Treasure 👑)             │
@@ -32,34 +32,34 @@ Think of your cloud infrastructure like a secure medieval castle:
 
 ## 🔢 Understanding CIDR Notation (Without the Headache!)
 
-When creating networks in AWS, you will see numbers like `10.0.0.0/16`.
+When creating networks in AWS, you define IP address blocks using **CIDR notation** (e.g., `10.0.0.0/16`):
 
-| CIDR Block        | What It Means                   | Usable IP Addresses | Best For            |
-| :---------------- | :------------------------------ | :-----------------: | :------------------ |
-| **`10.0.0.0/16`** | A giant private network.        |   **65,536 IPs**    | Your entire VPC.    |
-| **`10.0.1.0/24`** | A smaller slice of the network. |     **251 IPs**     | Individual Subnets. |
+| CIDR Block | Total IPs | Usable Server IPs | Best Used For |
+| :--- | :---: | :---: | :--- |
+| **`10.0.0.0/16`** | 65,536 | 65,531 | Entire Custom VPC Network |
+| **`10.0.x.0/24`** | 256 | 251 | Individual Subnets |
 
 > [!NOTE]
-> AWS reserves 5 IP addresses in every subnet for network routing, DNS, and broadcast. So a `/24` gives you $256 - 5 = 251$ usable server IPs.
+> AWS reserves 5 IP addresses in every subnet for network routing, router interface, DNS, future use, and broadcast. A `/24` subnet gives you $256 - 5 = 251$ usable server IP addresses.
 
 ---
 
 ## 🗺️ Our 6-Subnet Architecture Across 2 Availability Zones
 
-To ensure high availability (so your website stays online even if an entire AWS data center suffers a power outage), we span across **two Availability Zones** (`us-east-1a` and `us-east-1b`):
+To ensure high availability (so your website stays online even if an entire AWS data center suffers an outage), we deploy subnets across **two Availability Zones** (`us-east-1a` and `us-east-1b`):
 
 ```
-VPC: 10.0.0.0/16
+production-vpc (10.0.0.0/16)
 │
-├── 📍 Availability Zone A (e.g., us-east-1a)
-│   ├── 🌐 Public Subnet A:     10.0.1.0/24   (For ALB)
-│   ├── 🔒 Private App Subnet A: 10.0.11.0/24  (For EC2 #1)
-│   └── 🐘 Private DB Subnet A:  10.0.21.0/24  (For RDS Primary)
+├── 📍 Availability Zone A (e.g. us-east-1a)
+│   ├── 🌐 Public Subnet 1a:     10.0.1.0/24   (For Application Load Balancer)
+│   ├── 🔒 Private App Subnet 1a: 10.0.11.0/24  (For EC2 Application Fleet)
+│   └── 🐘 Private DB Subnet 1a:  10.0.21.0/24  (For Amazon RDS Primary DB)
 │
-└── 📍 Availability Zone B (e.g., us-east-1b)
-    ├── 🌐 Public Subnet B:     10.0.2.0/24   (For ALB)
-    ├── 🔒 Private App Subnet B: 10.0.12.0/24  (For EC2 #2)
-    └── 🐘 Private DB Subnet B:  10.0.22.0/24  (For RDS Standby)
+└── 📍 Availability Zone B (e.g. us-east-1b)
+    ├── 🌐 Public Subnet 1b:     10.0.2.0/24   (For Application Load Balancer)
+    ├── 🔒 Private App Subnet 1b: 10.0.12.0/24  (For EC2 Application Fleet)
+    └── 🐘 Private DB Subnet 1b:  10.0.22.0/24  (For Amazon RDS Standby DB)
 ```
 
 ---
@@ -68,57 +68,77 @@ VPC: 10.0.0.0/16
 
 ### Part 1: Create the Custom VPC
 
-1. Log into your [AWS Console](https://console.aws.amazon.com/).
-2. In the top search bar, type **VPC** and click **VPC**.
-3. In the left menu, click **Your VPCs** $\rightarrow$ Click the orange **Create VPC** button.
-4. Settings:
-   - Select: **VPC only**
+1. Open the [AWS Management Console](https://console.aws.amazon.com/) and navigate to the **VPC Console**.
+2. Make sure your region in the top right is set to your preferred region (e.g., **N. Virginia / us-east-1**).
+3. In the left navigation menu, click **Your VPCs** $\rightarrow$ Click the orange **Create VPC** button.
+4. Fill in the details:
+   - **Resources to create**: Select **VPC only** (we will build subnets manually to master the concepts!).
    - **Name tag**: `production-vpc`
-   - **IPv4 CIDR block**: `10.0.0.0/16`
+   - **IPv4 CIDR block**: Select **IPv4 CIDR manual input**.
+   - **IPv4 CIDR**: `10.0.0.0/16`
    - **Tenancy**: `Default`
-5. Click **Create VPC**.
+5. Click **Create VPC**! 🎉
 
 ---
 
 ### Part 2: Create the 6 Subnets
 
-In the left menu, click **Subnets** $\rightarrow$ Click **Create subnet**.
-Select your `production-vpc`, then create the subnets using this exact table:
+In the left menu, click **Subnets** $\rightarrow$ Click **Create subnet**. Select `production-vpc`.
 
-|   #   | Subnet Name             | Availability Zone | IPv4 CIDR Block | Type                  |
-| :---: | :---------------------- | :---------------- | :-------------- | :-------------------- |
-| **1** | `public-subnet-1a`      | `us-east-1a`      | `10.0.1.0/24`   | 🌐 Public (ALB)       |
-| **2** | `public-subnet-1b`      | `us-east-1b`      | `10.0.2.0/24`   | 🌐 Public (ALB)       |
-| **3** | `private-app-subnet-1a` | `us-east-1a`      | `10.0.11.0/24`  | 🔒 Private (App)      |
-| **4** | `private-app-subnet-1b` | `us-east-1b`      | `10.0.12.0/24`  | 🔒 Private (App)      |
-| **5** | `private-db-subnet-1a`  | `us-east-1a`      | `10.0.21.0/24`  | 🐘 Private (Database) |
-| **6** | `private-db-subnet-1b`  | `us-east-1b`      | `10.0.22.0/24`  | 🐘 Private (Database) |
+Create each subnet with the exact settings below:
 
-#### 💡 Enable Auto-assign Public IP for Public Subnets:
+#### Availability Zone A (e.g. `us-east-1a`):
+1. **Public Subnet 1A**:
+   - Subnet name: `public-subnet-1a`
+   - Availability Zone: Select your first AZ (e.g. `us-east-1a`)
+   - IPv4 CIDR block: `10.0.1.0/24`
+2. **Private App Subnet 1A**:
+   - Subnet name: `private-app-subnet-1a`
+   - Availability Zone: `us-east-1a`
+   - IPv4 CIDR block: `10.0.11.0/24`
+3. **Private DB Subnet 1A**:
+   - Subnet name: `private-db-subnet-1a`
+   - Availability Zone: `us-east-1a`
+   - IPv4 CIDR block: `10.0.21.0/24`
 
-1. Select `public-subnet-1a` $\rightarrow$ Click **Actions** $\rightarrow$ **Edit subnet settings**.
-2. Check ✅ **Enable auto-assign public IPv4 address** $\rightarrow$ Click **Save**.
-3. Repeat for `public-subnet-1b`.
+#### Availability Zone B (e.g. `us-east-1b`):
+4. **Public Subnet 1B**:
+   - Subnet name: `public-subnet-1b`
+   - Availability Zone: Select your second AZ (e.g. `us-east-1b`)
+   - IPv4 CIDR block: `10.0.2.0/24`
+5. **Private App Subnet 1B**:
+   - Subnet name: `private-app-subnet-1b`
+   - Availability Zone: `us-east-1b`
+   - IPv4 CIDR block: `10.0.12.0/24`
+6. **Private DB Subnet 1B**:
+   - Subnet name: `private-db-subnet-1b`
+   - Availability Zone: `us-east-1b`
+   - IPv4 CIDR block: `10.0.22.0/24`
+
+Click **Create subnet**.
+
+> [!IMPORTANT]
+> **Enable Auto-Assign Public IP for Public Subnets**:
+> 1. In the Subnets list, select `public-subnet-1a` $\rightarrow$ Click **Actions** $\rightarrow$ **Edit subnet settings**.
+> 2. Check the box ✅ **Enable auto-assign public IPv4 address** $\rightarrow$ Click **Save**.
+> 3. Repeat this for `public-subnet-1b`.
 
 ---
 
-### Part 3: Create and Attach the Internet Gateway (IGW)
+### Part 3: Create & Attach an Internet Gateway (IGW)
 
-An Internet Gateway is the gateway that connects your VPC to the public internet:
+An Internet Gateway acts as the bridge connecting your VPC to the public internet:
 
-1. In the left menu, click **Internet Gateways** $\rightarrow$ Click **Create internet gateway**.
+1. In the left VPC menu, click **Internet Gateways** $\rightarrow$ Click **Create internet gateway**.
 2. **Name tag**: `production-igw` $\rightarrow$ Click **Create internet gateway**.
-3. On the next screen, click **Actions** $\rightarrow$ **Attach to VPC**.
-4. Select `production-vpc` $\rightarrow$ Click **Attach internet gateway**.
+3. Once created, click **Actions** $\rightarrow$ **Attach to VPC**.
+4. Select `production-vpc` $\rightarrow$ Click **Attach internet gateway**! 🌐
 
 ---
 
-### Part 4: Configure Route Tables
-
-A **Route Table** is the highway road signs determining where network packets travel.
+### Part 4: Configure Public & Private Route Tables
 
 #### 1. Public Route Table:
-
 1. In the left menu, click **Route Tables** $\rightarrow$ Click **Create route table**.
 2. **Name**: `public-route-table` $\rightarrow$ Select `production-vpc` $\rightarrow$ Click **Create**.
 3. Click the **Routes** tab $\rightarrow$ Click **Edit routes**.
@@ -130,12 +150,16 @@ A **Route Table** is the highway road signs determining where network packets tr
 6. Check both `public-subnet-1a` and `public-subnet-1b` $\rightarrow$ Click **Save associations**.
 
 #### 2. Private Route Table:
-
 1. Click **Create route table**.
 2. **Name**: `private-route-table` $\rightarrow$ Select `production-vpc` $\rightarrow$ Click **Create**.
 3. Click the **Subnet associations** tab $\rightarrow$ Click **Edit subnet associations**.
-4. Check all 4 private subnets (`private-app-1a`, `private-app-1b`, `private-db-1a`, `private-db-1b`) $\rightarrow$ Click **Save associations**.
-   _(Notice: The private route table has NO route to the Internet Gateway. This makes it completely invisible to internet port scanners!)_ 🛡️
+4. Check all 4 private subnets:
+   - `private-app-subnet-1a`
+   - `private-app-subnet-1b`
+   - `private-db-subnet-1a`
+   - `private-db-subnet-1b`
+5. Click **Save associations**.  
+   *(Notice: The private route table has NO route to the Internet Gateway, keeping your database and private servers completely isolated!)* 🛡️
 
 ---
 
@@ -144,13 +168,13 @@ A **Route Table** is the highway road signs determining where network packets tr
 ### 1. View the AWS VPC "Resource Map"
 - In the VPC Console, click on `production-vpc`.
 - Scroll down to the **Resource map** tab!
-- AWS renders a live visual diagram showing:
-  `production-vpc` $\rightarrow$ 6 Subnets $\rightarrow$ 2 Route Tables $\rightarrow$ `production-igw`! 🗺️
-  *If all 6 subnets and both route tables are connected, your network is 100% correct.*
+- AWS renders a live visual diagram showing:  
+  `production-vpc` $\longrightarrow$ 6 Subnets $\longrightarrow$ 2 Route Tables $\longrightarrow$ `production-igw`! 🗺️  
+  *If all 6 subnets and both route tables are connected, your network is 100% verified.*
 
-### 2. Verify Public vs Private Subnet Settings
+### 2. Verify Public vs Private Subnet Configuration
 - Click **Subnets** $\rightarrow$ select `public-subnet-1a`:
-  - Verify **Auto-assign public IPv4 address**: `Yes` 🌐
+  - Verify **Auto-assign public IPv4 address**: `Yes` 🟢
 - Select `private-app-subnet-1a`:
   - Verify **Auto-assign public IPv4 address**: `No` 🔒
 
@@ -158,24 +182,18 @@ A **Route Table** is the highway road signs determining where network packets tr
 
 ## 📸 Proof of Work: Screenshots
 
-> [!TIP]
-> Save your screenshots into `docs/screenshots/` and update these links:
-
 ### 🖼️ Screenshot 1: Custom VPC Created in AWS Console
-
 ![Custom VPC Created in AWS Console](./screenshots/01-vpc-created.png)
 
 ### 🖼️ Screenshot 2: Six Multi-AZ Subnets Created
-
 ![Six Multi-AZ Subnets Created](./screenshots/02-vpc-subnets-created.png)
 
 ### 🖼️ Screenshot 3: Internet Gateway Attached & Route Table Configured
-
 ![Internet Gateway Attached & Route Table Configured](./screenshots/03-vpc-igw-route-table.png)
 
 ---
 
-## ⏭️ Ready for Day 2?
+## ⏭️ Ready for Step 2?
 
 Now let's build our layered firewall defense with Security Groups:  
 👉 **[Go to Step 2: 02-security-groups-defense.md](./02-security-groups-defense.md)**

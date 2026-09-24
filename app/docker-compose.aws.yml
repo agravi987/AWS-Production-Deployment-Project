@@ -1,13 +1,13 @@
 # ==============================================================================
 # Production Docker Compose for AWS EC2 Instances
-# Application Tier: React Frontend + Express Backend
-# Database Tier: Connects to external Amazon RDS PostgreSQL endpoint
+# Application Tier: React Frontend (Nginx) + Express Backend (Node.js)
+# Database Tier: External Amazon RDS PostgreSQL (via private subnet)
 # ==============================================================================
 
 services:
   # 1. Express Backend REST API
   server:
-    image: ${DOCKER_USERNAME}/devops-server:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME:-agravi987}/devops-server:${IMAGE_TAG:-latest}
     container_name: aws_backend
     restart: always
     environment:
@@ -15,18 +15,18 @@ services:
       NODE_ENV: production
       # Amazon RDS PostgreSQL Configuration
       DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      DB_NAME: ${DB_NAME:-devops_db}
     ports:
       - "5000:5000"
     networks:
       - app_network
 
-  # 2. React Frontend (Nginx Reverse Proxy)
+  # 2. React Frontend (Nginx Reverse Proxy on Port 80)
   client:
-    image: ${DOCKER_USERNAME}/devops-client:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME:-agravi987}/devops-client:${IMAGE_TAG:-latest}
     container_name: aws_frontend
     restart: always
     ports:
