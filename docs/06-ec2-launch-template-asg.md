@@ -1,6 +1,6 @@
-# 📈 Step 4: EC2 Launch Templates & Multi-AZ Auto Scaling
+# 📈 Step 6: EC2 Launch Templates & Multi-AZ Auto Scaling
 
-Welcome to Day 4! 📈  
+Welcome to Day 6! 📈  
 Today, you build the **self-healing, auto-scaling engine** of your cloud infrastructure.
 
 ---
@@ -262,19 +262,19 @@ Want to see AWS self-healing with your own eyes?
 
 ### 🖼️ Screenshot 1: Launch Template with User Data Script
 
-![Launch Template with User Data Script](image-2.png)
+![Launch Template with User Data Script](./image-2.png)
 
 ### 🖼️ Screenshot 2: Auto Scaling Group Across Multi-AZ Private Subnets
 
-![Auto Scaling Group Across Multi-AZ Private Subnets](image-3.png)
+![Auto Scaling Group Across Multi-AZ Private Subnets](./image-3.png)
 
 ### 🖼️ Screenshot 3: Auto-Healing Activity History
 
-![Auto-Healing Activity History](image-4.png)
+![Auto-Healing Activity History](./image-4.png)
 
 ---
 
-## ⏭️ Ready for Day 5?
+## ⏭️ Ready for Day 7?
 
-Now let's explore Amazon RDS PostgreSQL in depth, including automated backups and multi-AZ failovers:  
-👉 **[Go to Step 5: 05-rds-database-mastery.md](./05-rds-database-mastery.md)**
+Now let's configure Route 53 Custom Domains and free SSL/TLS certificates (HTTPS):  
+👉 **[Go to Step 7: 07-route53-and-https.md](./07-route53-and-https.md)**

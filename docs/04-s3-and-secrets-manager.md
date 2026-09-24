@@ -1,6 +1,6 @@
-# 🔐 Step 7: AWS Secrets Manager & Amazon S3 Integration
+# 🔐 Step 4: AWS Secrets Manager & Amazon S3 Integration
 
-Welcome to Day 7! 🔐  
+Welcome to Day 4! 🔐  
 In this step, you will eliminate hardcoded passwords forever using **AWS Secrets Manager** and learn how to manage cloud storage with **Amazon S3**.
 
 ---
@@ -152,6 +152,6 @@ Amazon S3 (Simple Storage Service) is the cloud's infinite hard drive:
 
 ---
 
-## ⏭️ Ready for Day 8?
-Learn how to monitor metrics and set up automated CloudWatch alerts:  
-👉 **[Go to Step 8: 08-cloudwatch-monitoring.md](./08-cloudwatch-monitoring.md)**
+## ⏭️ Ready for Day 5?
+Now that your database and credentials vault are ready, let's create the Application Load Balancer and Target Group:  
+👉 **[Go to Step 5: 05-application-load-balancer.md](./05-application-load-balancer.md)**

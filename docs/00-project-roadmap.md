@@ -47,9 +47,9 @@ To make the application work seamlessly without chicken-and-egg dependency error
 
 ---
 
-## 🗓️ Day-by-Day Milestone Plan
+## 🗓️ Step-by-Step Architectural Milestone Plan
 
-### 📍 Day 1: Virtual Private Cloud (VPC) & Networking 🌐
+### 📍 Step 1: Virtual Private Cloud (VPC) & Networking 🌐
 - [ ] Read **[01-vpc-and-networking.md](./01-vpc-and-networking.md)**
 - [ ] Understand why we NEVER deploy directly into the Default VPC.
 - [ ] Create a custom VPC (`10.0.0.0/16`).
@@ -59,7 +59,7 @@ To make the application work seamlessly without chicken-and-egg dependency error
 
 ---
 
-### 📍 Day 2: Layered Security Groups (Zero-Trust Defense) 🛡️
+### 📍 Step 2: Layered Security Groups (Zero-Trust Defense) 🛡️
 - [ ] Read **[02-security-groups-defense.md](./02-security-groups-defense.md)**
 - [ ] Understand the security chain: `ALB SG ──► EC2 App SG ──► RDS Database SG`.
 - [ ] Create the ALB Security Group (Allows Ports 80 & 443 from Internet).
@@ -69,52 +69,74 @@ To make the application work seamlessly without chicken-and-egg dependency error
 
 ---
 
-### 📍 Day 3: Amazon RDS Managed Database 🐘
-- [ ] Read **[05-rds-database-mastery.md](./05-rds-database-mastery.md)**
+### 📍 Step 3: Amazon RDS Managed Database 🐘
+- [ ] Read **[03-rds-database-mastery.md](./03-rds-database-mastery.md)**
 - [ ] Create an RDS DB Subnet Group across private database subnets.
 - [ ] Launch a Free-Tier PostgreSQL RDS instance.
-- [ ] Understand automated snapshots, maintenance windows, and Multi-AZ failover.
-- 🎯 **Milestone**: Your production database is provisioned and securely isolated from the internet!
+- [ ] Note down the master RDS endpoint for the next step.
+- 🎯 **Milestone**: Your production database is provisioned and securely isolated in private subnets!
 
 ---
 
-### 📍 Day 4: Application Load Balancer (ALB) ⚖️
-- [ ] Read **[03-application-load-balancer.md](./03-application-load-balancer.md)**
+### 📍 Step 4: AWS Secrets Manager & S3 🔐📦
+- [ ] Read **[04-s3-and-secrets-manager.md](./04-s3-and-secrets-manager.md)**
+- [ ] Store RDS endpoint, username, password in AWS Secrets Manager (`app/production/db`).
+- [ ] Create an IAM Role for EC2 with `SecretsManagerReadWrite` policy attached.
+- [ ] Create a private S3 bucket with Block Public Access enabled.
+- 🎯 **Milestone**: Cloud credentials are securely vaulted with zero hardcoded passwords!
+
+---
+
+### 📍 Step 5: Application Load Balancer (ALB) ⚖️
+- [ ] Read **[05-application-load-balancer.md](./05-application-load-balancer.md)**
 - [ ] Create an ALB Target Group with HTTP health check (`/api/health`).
 - [ ] Launch an internet-facing Application Load Balancer across Public Subnets.
-- [ ] Configure listener routing rules.
-- 🎯 **Milestone**: Traffic is distributed evenly across multiple Availability Zones!
+- [ ] Configure HTTP listener routing rules.
+- 🎯 **Milestone**: Traffic distribution and automated health checks are ready!
 
 ---
 
-### 📍 Day 5: EC2 Launch Templates & Auto Scaling Groups 📈
-- [ ] Read **[04-ec2-launch-template-asg.md](./04-ec2-launch-template-asg.md)**
-- [ ] Create an EC2 Launch Template with our User Data bootstrap script.
-- [ ] Create an Auto Scaling Group (Minimum: 2, Desired: 2, Maximum: 4).
-- [ ] Attach the Auto Scaling Group to the ALB Target Group.
+### 📍 Step 6: EC2 Launch Templates & Auto Scaling Groups 📈
+- [ ] Read **[06-ec2-launch-template-asg.md](./06-ec2-launch-template-asg.md)**
+- [ ] Create an EC2 Launch Template with dynamic Secrets Manager fetch in User Data.
+- [ ] Attach the IAM instance profile created in Step 4.
+- [ ] Launch an Auto Scaling Group across Private App Subnets attached to the ALB Target Group.
 - [ ] Test auto-healing: Terminate an EC2 instance and watch ASG automatically replace it! 🪄
-- 🎯 **Milestone**: Your app is highly available, self-healing, and fault-tolerant!
+- 🎯 **Milestone**: Your app is highly available, self-healing, and dynamically connected to RDS!
 
 ---
 
-### 📍 Day 6: Route 53, HTTPS (SSL) & Secrets Management 🌍🔒
-- [ ] Read **[06-route53-and-https.md](./06-route53-and-https.md)**
-- [ ] Read **[07-s3-and-secrets-manager.md](./07-s3-and-secrets-manager.md)**
+### 📍 Step 7: Route 53 Custom Domains & HTTPS (SSL) 🌍🔒
+- [ ] Read **[07-route53-and-https.md](./07-route53-and-https.md)**
 - [ ] Request a free SSL certificate in AWS Certificate Manager (ACM).
 - [ ] Configure Route 53 Alias record pointing to your ALB.
-- [ ] Store database passwords in AWS Secrets Manager with zero hardcoded values.
-- 🎯 **Milestone**: Your website is protected by green HTTPS padlock and custom domain!
+- [ ] Configure ALB HTTPS listener on Port 443 and HTTP-to-HTTPS redirect.
+- 🎯 **Milestone**: Your website is protected by a custom domain and green HTTPS padlock!
 
 ---
 
-### 📍 Day 7: CloudWatch Monitoring, Cleanup & Interview Mastery 📊💼
+### 📍 Step 8: CloudWatch Monitoring & Alerts 📊
 - [ ] Read **[08-cloudwatch-monitoring.md](./08-cloudwatch-monitoring.md)**
+- [ ] Set up CloudWatch CPU alarms (>70% utilization).
+- [ ] Configure Amazon SNS email alerts to notify you of high load.
+- [ ] Build a unified CloudWatch metrics dashboard.
+- 🎯 **Milestone**: Real-time cloud observability and automated incident alerting!
+
+---
+
+### 📍 Step 9: Cost Management & Safe Teardown Checklist 💰
 - [ ] Read **[09-cost-management-cleanup.md](./09-cost-management-cleanup.md)**
+- [ ] Create a $1.00 AWS Zero-Spend Budget alarm.
+- [ ] Follow the safe reverse-order teardown checklist when finished.
+- 🎯 **Milestone**: 100% Free Tier protection and clean cloud hygiene!
+
+---
+
+### 📍 Step 10: Interview Masterclass & Career Portfolio 💼
 - [ ] Read **[10-interview-masterclass.md](./10-interview-masterclass.md)**
-- [ ] Set up CloudWatch CPU alarms with email notifications (SNS).
-- [ ] Review the safe teardown checklist so you never get unexpected AWS charges! 💰
-- [ ] Practice the top 15 cloud architecture interview questions.
-- 🎯 **Milestone**: You are fully qualified to talk about real cloud architecture in DevOps interviews!
+- [ ] Practice 15 architectural interview questions and master the 2-minute elevator pitch.
+- [ ] Add quantified resume bullet points to your CV.
+- 🎯 **Milestone**: You are fully qualified to ace DevOps and Cloud Engineer interviews!
 
 ---
 

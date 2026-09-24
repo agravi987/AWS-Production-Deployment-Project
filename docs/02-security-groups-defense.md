@@ -137,4 +137,4 @@ Instead of IP addresses, AWS allows you to use a **Security Group as the Source*
 ## ⏭️ Ready for Day 3?
 
 Now let's launch our managed cloud database on Amazon RDS:  
-👉 **[Go to Step 3: 05-rds-database-mastery.md](./05-rds-database-mastery.md)**
+👉 **[Go to Step 3: 03-rds-database-mastery.md](./03-rds-database-mastery.md)**

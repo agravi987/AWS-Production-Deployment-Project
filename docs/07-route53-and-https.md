@@ -1,6 +1,6 @@
-# 🌍 Step 6: Amazon Route 53 & HTTPS (SSL/TLS Encryption)
+# 🌍 Step 7: Amazon Route 53 & HTTPS (SSL/TLS Encryption)
 
-Welcome to Day 6! 🔒🌍  
+Welcome to Day 7! 🔒🌍  
 In modern cloud engineering, **HTTP is unacceptable for production**.  
 In this step, you will configure a custom domain name using **Amazon Route 53** and attach a free, auto-renewing SSL/TLS certificate from **AWS Certificate Manager (ACM)**.
 
@@ -149,6 +149,6 @@ Never let users stay on insecure HTTP! Let's redirect Port 80 to Port 443 automa
 
 ---
 
-## ⏭️ Ready for Day 7?
-Learn how to manage cloud secrets and assets with S3 and AWS Secrets Manager:  
-👉 **[Go to Step 7: 07-s3-and-secrets-manager.md](./07-s3-and-secrets-manager.md)**
+## ⏭️ Ready for Day 8?
+Learn how to monitor metrics and set up automated CloudWatch alerts:  
+👉 **[Go to Step 8: 08-cloudwatch-monitoring.md](./08-cloudwatch-monitoring.md)**

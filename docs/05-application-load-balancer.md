@@ -1,6 +1,6 @@
-# ⚖️ Step 3: Application Load Balancer (ALB) Mastery
+# ⚖️ Step 5: Application Load Balancer (ALB) Mastery
 
-Welcome to Day 3! ⚖️  
+Welcome to Day 5! ⚖️  
 In production, you never send users directly to a single EC2 instance IP address.  
 Instead, an **Application Load Balancer (ALB)** sits in front of your servers as a high-performance traffic director.
 
@@ -123,15 +123,15 @@ The Target Group tells the ALB _where_ to forward traffic and _how_ to test serv
 
 ### 🖼️ Screenshot 1: Target Group Configured with Health Checks
 
-![Target Group Configured with Health Checks](image.png)
+![Target Group Configured with Health Checks](./image.png)
 
 ### 🖼️ Screenshot 2: Application Load Balancer Active Across Public Subnets
 
-![Application Load Balancer Active Across Public Subnets](image-1.png)
+![Application Load Balancer Active Across Public Subnets](./image-1.png)
 
 ---
 
-## ⏭️ Ready for Day 4?
+## ⏭️ Ready for Day 6?
 
-Now let's create the Auto Scaling Group that automatically deploys EC2 instances to this Target Group:  
-👉 **[Go to Step 4: 04-ec2-launch-template-asg.md](./04-ec2-launch-template-asg.md)**
+Now let's create the EC2 Launch Template and Auto Scaling Group to boot application containers and attach to this Target Group:  
+👉 **[Go to Step 6: 06-ec2-launch-template-asg.md](./06-ec2-launch-template-asg.md)**

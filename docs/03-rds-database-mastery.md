@@ -1,6 +1,6 @@
-# 🐘 Step 5: Amazon RDS PostgreSQL (Managed Database Mastery)
+# 🐘 Step 3: Amazon RDS PostgreSQL (Managed Database Mastery)
 
-Welcome to Day 5! 🐘  
+Welcome to Day 3! 🐘  
 In this step, you will provision an **Amazon RDS (Relational Database Service)** instance.
 
 ---
@@ -165,6 +165,6 @@ node test-rds-connection.js
 
 ---
 
-## ⏭️ Ready for Day 6?
-Now let's configure Route 53 Custom Domains and free SSL/TLS certificates (HTTPS):  
-👉 **[Go to Step 6: 06-route53-and-https.md](./06-route53-and-https.md)**
+## ⏭️ Ready for Day 4?
+Now let's store these credentials securely in AWS Secrets Manager and configure EC2 IAM authentication:  
+👉 **[Go to Step 4: 04-s3-and-secrets-manager.md](./04-s3-and-secrets-manager.md)**
