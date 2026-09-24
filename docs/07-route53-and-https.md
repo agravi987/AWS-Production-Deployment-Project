@@ -120,17 +120,17 @@ Navigate to `https://app.yourdomain.com`:
 
 ### 🖼️ Screenshot 1: ACM SSL Certificate Issued
 <!-- Save your screenshot here as proof of work -->
-![ACM Certificate Issued](./screenshots/14-acm-ssl-issued.png)
+![ACM Certificate Issued](./screenshots/17-acm-ssl-issued.png)
 *Caption: ACM console displaying public certificate status Issued.*
 
 ### 🖼️ Screenshot 2: Application Load Balancer HTTPS 443 Listener
 <!-- Save your screenshot here as proof of work -->
-![ALB HTTPS Listener](./screenshots/15-alb-https-listener.png)
+![ALB HTTPS Listener](./screenshots/18-alb-https-listener.png)
 *Caption: production-alb listeners showing HTTP:80 redirecting to HTTPS:443.*
 
 ### 🖼️ Screenshot 3: Route 53 Alias Record Pointing to ALB
 <!-- Save your screenshot here as proof of work -->
-![Route 53 Alias Record](./screenshots/16-route53-alias-record.png)
+![Route 53 Alias Record](./screenshots/19-route53-alias-record.png)
 *Caption: Route 53 record details targeting dualstack.production-alb.*
 
 ---

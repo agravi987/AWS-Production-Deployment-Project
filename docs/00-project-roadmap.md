@@ -7,7 +7,7 @@ This roadmap guides you through building a **highly available, fault-tolerant, s
 
 ## 🎯 The Architectural Blueprint & Execution Sequence
 
-![AWS Production Deployment Workflow and Architecture Roadmap](./aws-deployment-workflow.jpg)
+![AWS Production Deployment Workflow and Architecture Roadmap](./screenshots/00-aws-deployment-workflow.jpg)
 
 ```
                                THE INTERNET 🌐
@@ -82,8 +82,8 @@ As you progress through each step, confirm your architecture using the embedded 
 - **Firewalls**: Security Group rules chained in Step 2.
 - **Database**: Amazon RDS status *Available* and connectivity test in Step 3.
 - **Secrets**: Encrypted credentials in Secrets Manager & IAM instance profile attached in Step 4.
-- **Traffic Routing**: ALB status *Active* and Target Group in Step 5 (`image.png`, `image-1.png`).
-- **Compute**: Auto-healing instances running in Step 6 (`image-2.png`, `image-3.png`, `image-4.png`).
+- **Traffic Routing**: ALB status *Active* and Target Group in Step 5 (`./screenshots/12-alb-target-group.png`, `./screenshots/13-alb-active.png`).
+- **Compute**: Auto-healing instances running in Step 6 (`./screenshots/14-ec2-launch-template.png`, `./screenshots/15-asg-instances-healthy.png`, `./screenshots/16-asg-self-healing-activity.png`).
 - **Security**: HTTPS padlock and valid ACM certificate in Step 7.
 - **Operations**: Stress-tested CloudWatch alarms and email alerts in Step 8.
 

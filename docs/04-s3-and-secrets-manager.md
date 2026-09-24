@@ -129,17 +129,17 @@ Amazon S3 (Simple Storage Service) provides 99.999999999% (11 9's) data durabili
 
 ### 🖼️ Screenshot 1: Database Secret Stored in Secrets Manager
 <!-- Save your screenshot here as proof of work -->
-![Secrets Manager](./screenshots/17-secrets-manager-stored.png)
+![Secrets Manager](./screenshots/09-secrets-manager-stored.png)
 *Caption: production/database/credentials stored with KMS encryption.*
 
 ### 🖼️ Screenshot 2: IAM Role Created for EC2
 <!-- Save your screenshot here as proof of work -->
-![IAM Role for EC2](./screenshots/18-iam-role-secrets-manager.png)
+![IAM Role for EC2](./screenshots/10-iam-role-secrets-manager.png)
 *Caption: production-ec2-secrets-role with SecretsManagerReadWrite attached.*
 
 ### 🖼️ Screenshot 3: Private S3 Bucket Created
 <!-- Save your screenshot here as proof of work -->
-![S3 Bucket](./screenshots/19-s3-bucket-created.png)
+![S3 Bucket](./screenshots/11-s3-bucket-created.png)
 *Caption: S3 console showing private bucket with Block All Public Access enabled.*
 
 ---

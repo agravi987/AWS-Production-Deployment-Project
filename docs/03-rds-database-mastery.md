@@ -124,12 +124,12 @@ Availability Zone A (us-east-1a)              Availability Zone B (us-east-1b)
 
 ### 🖼️ Screenshot 1: DB Subnet Group Configured Across Private Subnets
 <!-- Save your screenshot here as proof of work -->
-![DB Subnet Group](./screenshots/12-rds-db-subnet-group.png)
+![DB Subnet Group](./screenshots/07-rds-db-subnet-group.png)
 *Caption: production-db-subnet-group spanning private-db-subnet-1a and 1b.*
 
 ### 🖼️ Screenshot 2: Amazon RDS PostgreSQL Instance Available
 <!-- Save your screenshot here as proof of work -->
-![RDS PostgreSQL Available](./screenshots/13-rds-postgres-available.png)
+![RDS PostgreSQL Available](./screenshots/08-rds-postgres-available.png)
 *Caption: production-postgres showing status Available and endpoint in production-vpc.*
 
 ---

@@ -113,10 +113,10 @@ The Target Group defines *where* to forward incoming traffic and *how* to monito
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: Target Group Configured with Health Checks
-![Target Group Configured with Health Checks](./image.png)
+![Target Group Configured with Health Checks](./screenshots/12-alb-target-group.png)
 
 ### 🖼️ Screenshot 2: Application Load Balancer Active Across Public Subnets
-![Application Load Balancer Active Across Public Subnets](./image-1.png)
+![Application Load Balancer Active Across Public Subnets](./screenshots/13-alb-active.png)
 
 ---
 
