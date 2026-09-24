@@ -4,7 +4,9 @@ Welcome to **Project 4: AWS Production Deployment**! This project guides you ste
 
 ---
 
-## 🏗️ Production Architecture Overview
+## 🏗️ Production Architecture & Deployment Workflow
+
+![AWS Production Deployment Workflow and Architecture Roadmap](./docs/aws-deployment-workflow.jpg)
 
 ```
                                THE INTERNET 🌐
