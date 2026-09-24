@@ -8,10 +8,12 @@ In this step, you will engineer an **enterprise-grade layered firewall defense**
 ## 🚫 The Junior Mistake vs. The Senior Architecture
 
 ### ❌ The Junior Mistake:
+
 Opening Port 5432 (Postgres) or Port 5000 (Express) to `0.0.0.0/0` (Anywhere).  
 If an attacker discovers your IP address, they can brute-force your database directly!
 
-###  The Senior Architecture: Security Group Chaining
+### The Senior Architecture: Security Group Chaining
+
 Instead of IP addresses, AWS allows you to use a **Security Group as the Source** for another Security Group!
 
 ```
@@ -44,17 +46,18 @@ Instead of IP addresses, AWS allows you to use a **Security Group as the Source*
 
 ## 📋 The 3 Security Groups We Will Create
 
-| Security Group | Purpose | Inbound Rules | Outbound Rules |
-| :--- | :--- | :--- | :--- |
-| **`alb-sg`** | Front door for Load Balancer | • HTTP (Port 80) from `0.0.0.0/0`<br>• HTTPS (Port 443) from `0.0.0.0/0` | All traffic (`0.0.0.0/0`) |
-| **`ec2-app-sg`** | Application EC2 Servers | • HTTP (Port 80) from `alb-sg`<br>• Custom TCP (Port 5000) from `alb-sg`<br>• SSH (Port 22) from **My IP** (Optional) | All traffic (`0.0.0.0/0`) |
-| **`rds-db-sg`** | Amazon RDS Database | • PostgreSQL (Port 5432) from `ec2-app-sg` | All traffic (`0.0.0.0/0`) |
+| Security Group   | Purpose                      | Inbound Rules                                                                                                         | Outbound Rules            |
+| :--------------- | :--------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :------------------------ |
+| **`alb-sg`**     | Front door for Load Balancer | • HTTP (Port 80) from `0.0.0.0/0`<br>• HTTPS (Port 443) from `0.0.0.0/0`                                              | All traffic (`0.0.0.0/0`) |
+| **`ec2-app-sg`** | Application EC2 Servers      | • HTTP (Port 80) from `alb-sg`<br>• Custom TCP (Port 5000) from `alb-sg`<br>• SSH (Port 22) from **My IP** (Optional) | All traffic (`0.0.0.0/0`) |
+| **`rds-db-sg`**  | Amazon RDS Database          | • PostgreSQL (Port 5432) from `ec2-app-sg`                                                                            | All traffic (`0.0.0.0/0`) |
 
 ---
 
 ## 🖱️ Step-by-Step AWS Management Console Walkthrough
 
 ### 1. Create `alb-sg` (Application Load Balancer Firewall)
+
 1. Open the [AWS VPC Console](https://console.aws.amazon.com/vpc/).
 2. In the left menu, click **Security Groups** $\rightarrow$ Click **Create security group**.
 3. Basic details:
@@ -70,6 +73,7 @@ Instead of IP addresses, AWS allows you to use a **Security Group as the Source*
 ---
 
 ### 2. Create `ec2-app-sg` (EC2 Application Firewall)
+
 1. Click **Create security group**.
 2. Basic details:
    - **Security group name**: `production-ec2-app-sg`
@@ -85,6 +89,7 @@ Instead of IP addresses, AWS allows you to use a **Security Group as the Source*
 ---
 
 ### 3. Create `rds-db-sg` (Database Firewall)
+
 1. Click **Create security group**.
 2. Basic details:
    - **Security group name**: `production-rds-db-sg`
@@ -104,22 +109,18 @@ Instead of IP addresses, AWS allows you to use a **Security Group as the Source*
 > Save your screenshots into `docs/screenshots/` and update these links:
 
 ### 🖼️ Screenshot 1: ALB Security Group with Public Ingress
-<!-- Replace with your screenshot path once taken -->
-![ALB Security Group](./screenshots/04-alb-security-group.png)
-*Caption: production-alb-sg showing inbound rules for Port 80 and 443 from 0.0.0.0/0.*
+
+![ALB Security Group with Public Ingress](./screenshots/04-alb-security-group.png)
 
 ### 🖼️ Screenshot 2: EC2 Security Group Chained to ALB SG
-<!-- Replace with your screenshot path once taken -->
-![EC2 Security Group](./screenshots/05-ec2-security-group-chained.png)
-*Caption: production-ec2-app-sg showing inbound traffic restricted to source = production-alb-sg.*
+
+![EC2 Security Group Chained to ALB SG](./screenshots/05-ec2-security-group.png)
 
 ### 🖼️ Screenshot 3: RDS Security Group Chained to EC2 SG
-<!-- Replace with your screenshot path once taken -->
-![RDS Security Group](./screenshots/06-rds-security-group-chained.png)
-*Caption: production-rds-db-sg showing Port 5432 restricted to source = production-ec2-app-sg.*
 
----
+![RDS Security Group Chained to EC2 SG](./screenshots/06-rds-security-group.png)
 
 ## ⏭️ Ready for Day 3?
+
 Now let's launch our managed cloud database on Amazon RDS:  
 👉 **[Go to Step 3: 05-rds-database-mastery.md](./05-rds-database-mastery.md)**
