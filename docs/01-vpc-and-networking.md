@@ -139,6 +139,23 @@ A **Route Table** is the highway road signs determining where network packets tr
 
 ---
 
+## 🔍 Checkpoints: How to Verify & See Your Network Ready
+
+### 1. View the AWS VPC "Resource Map"
+- In the VPC Console, click on `production-vpc`.
+- Scroll down to the **Resource map** tab!
+- AWS renders a live visual diagram showing:
+  `production-vpc` $\rightarrow$ 6 Subnets $\rightarrow$ 2 Route Tables $\rightarrow$ `production-igw`! 🗺️
+  *If all 6 subnets and both route tables are connected, your network is 100% correct.*
+
+### 2. Verify Public vs Private Subnet Settings
+- Click **Subnets** $\rightarrow$ select `public-subnet-1a`:
+  - Verify **Auto-assign public IPv4 address**: `Yes` 🌐
+- Select `private-app-subnet-1a`:
+  - Verify **Auto-assign public IPv4 address**: `No` 🔒
+
+---
+
 ## 📸 Proof of Work: Screenshots
 
 > [!TIP]

@@ -52,17 +52,17 @@ services:
       PORT: 5000
       NODE_ENV: production
       DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USER: ${DB_USER:-postgres}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME:-devops_db}
+      DB_NAME: ${DB_NAME}
     ports:
       - "5000:5000"
     networks:
       - app_network
 
   client:
-    image: ${DOCKER_USERNAME:-agravi987}/devops-client:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME}/devops-client:${IMAGE_TAG:-latest}
     container_name: aws_frontend
     restart: always
     ports:

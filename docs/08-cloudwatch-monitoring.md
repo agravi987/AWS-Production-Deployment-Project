@@ -88,6 +88,31 @@ Before creating an alarm, we need an alert destination (an SNS Topic) so AWS can
 
 ---
 
+## 🔍 Checkpoints: How to Verify & See Monitoring Live
+
+1. **Verify Alarm State is "OK"**:
+   - In CloudWatch $\rightarrow$ **All alarms**, check `production-high-cpu-alarm`:
+   - State should show green **OK** (indicating CPU is currently under 75%).
+
+2. **Simulate a CPU Spike (Test the Alert System!)**:
+   Connect to an EC2 instance and run a quick 3-minute CPU test:
+   ```bash
+   # Install stress tool
+   sudo apt-get install -y stress
+   # Stress 2 CPU cores for 3 minutes
+   stress --cpu 2 --timeout 180s
+   ```
+   *Within 5 minutes*:
+   - CloudWatch Alarm changes state from `OK` $\rightarrow$ **In alarm** (Red) 🚨!
+   - Amazon SNS dispatches an automated alert email to your inbox:  
+     `"ALARM: production-high-cpu-alarm in US East (N. Virginia)"` 📧!
+
+3. **Check Live Dashboard Metrics**:
+   - Open `production-overview-dashboard`.
+   - Refresh the website in your browser 10 times $\rightarrow$ Watch the `RequestCount` graph spike in real time! 📈
+
+---
+
 ## 📸 Proof of Work: Screenshots
 
 > [!TIP]

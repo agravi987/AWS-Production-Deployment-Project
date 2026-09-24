@@ -112,6 +112,42 @@ RDS takes about 5 to 10 minutes to provision. Once its status turns to **Availab
 
 ---
 
+## 🔍 Checkpoints: How to Verify & See RDS Running
+
+### 1. Verify RDS Instance Status is "Available"
+- In the **Amazon RDS** $\rightarrow$ **Databases** dashboard, verify:
+  - **Status**: `Available` 🟢
+  - **Role**: `Primary`
+  - **Engine**: `PostgreSQL 16.x`
+
+### 2. Test Connection from an EC2 Instance
+Connect to one of your EC2 instances in the private app subnet and run our test script:
+```bash
+# 1. Export your RDS credentials
+export DB_HOST="production-postgres.c123456789.us-east-1.rds.amazonaws.com"
+export DB_PORT=5432
+export DB_USER="postgres"
+export DB_PASSWORD="YourActualPassword123"
+export DB_NAME="devops_db"
+
+# 2. Test port connectivity
+nc -zv $DB_HOST 5432
+# Output: Connection to production-postgres... 5432 port [tcp/postgresql] succeeded! 🎉
+
+# 3. Or run our Node.js test script:
+cd /home/ubuntu/app
+node test-rds-connection.js
+```
+*Expected Output*:
+```text
+🔍 Attempting to connect to Amazon RDS at: production-postgres...:5432...
+🎉 SUCCESS: Successfully connected to Amazon RDS PostgreSQL!
+⏰ RDS Server Time: 2026-09-24 16:30:00
+🐘 PostgreSQL Version: PostgreSQL 16.2
+```
+
+---
+
 ## 📸 Proof of Work: Screenshots
 
 > [!TIP]

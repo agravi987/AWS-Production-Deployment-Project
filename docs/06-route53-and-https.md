@@ -106,6 +106,27 @@ Never let users stay on insecure HTTP! Let's redirect Port 80 to Port 443 automa
 
 ---
 
+## 🔍 Checkpoints: How to Verify HTTPS & DNS Live
+
+1. **Test DNS Resolution**:
+   Open terminal and test your domain:
+   ```bash
+   nslookup app.yourdomain.com
+   ```
+   *Expected Output*: Returns the dynamic IP addresses of your Application Load Balancer! 🌍
+
+2. **Verify Automated HTTP to HTTPS Redirection**:
+   Open browser and type:
+   `http://app.yourdomain.com` (Explicitly typing `http://`)
+   *Expected Result*: Instantly redirects to `https://app.yourdomain.com` with the secure padlock icon 🔒!
+
+3. **Inspect the SSL Certificate**:
+   Click the padlock icon in the browser address bar $\rightarrow$ **Connection is secure** $\rightarrow$ **Certificate is valid**:
+   - Issuer: **Amazon**
+   - Valid for: `*.yourdomain.com`
+
+---
+
 ## 📸 Proof of Work: Screenshots
 
 > [!TIP]

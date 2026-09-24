@@ -10,6 +10,7 @@ Today, you build the **self-healing, auto-scaling engine** of your cloud infrast
 In legacy systems, if a server's hard drive died at 3 AM on a Saturday, an engineer had to wake up and manually rebuild it.
 
 In modern AWS cloud:
+
 1. **Self-Healing**: If Server #1 crashes, the **Auto Scaling Group (ASG)** notices within 60 seconds, terminates the broken machine, and launches a fresh replacement automatically! 🪄
 2. **Elastic Scaling**: During Black Friday or a traffic surge, the ASG scales out from 2 servers to 4 servers. When traffic calms down, it scales back in to 2 servers to save money! 💰
 
@@ -39,6 +40,7 @@ In modern AWS cloud:
 ## 📜 1. What is an EC2 Launch Template?
 
 A **Launch Template** is an immutable cookie-cutter blueprint. It specifies:
+
 - Which Operating System to use (Ubuntu 24.04 LTS).
 - Which instance size (`t2.micro` or `t3.micro`).
 - Which Security Group to attach (`production-ec2-app-sg`).
@@ -49,6 +51,7 @@ A **Launch Template** is an immutable cookie-cutter blueprint. It specifies:
 ## 🖱️ Step-by-Step AWS Management Console Walkthrough
 
 ### Part 1: Create the Launch Template
+
 1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/).
 2. In the left menu under **Instances**, click **Launch Templates** $\rightarrow$ Click **Create launch template**.
 3. Template details:
@@ -56,13 +59,13 @@ A **Launch Template** is an immutable cookie-cutter blueprint. It specifies:
    - **Template version description**: `v1 - Production Docker containers with RDS`
    - Check ✅ **Provide guidance to help set up a template for use with Auto Scaling**.
 4. **Application and OS Images (Amazon Machine Image)**:
-   - Select **Quick Start** $\rightarrow$ choose **Ubuntu** (`Ubuntu Server 24.04 LTS`, 64-bit x86). *Free tier eligible*.
+   - Select **Quick Start** $\rightarrow$ choose **Ubuntu** (`Ubuntu Server 24.04 LTS`, 64-bit x86). _Free tier eligible_.
 5. **Instance type**:
    - Choose `t2.micro` (or `t3.micro`).
 6. **Key pair (login)**:
    - Choose your existing key pair (e.g. `devops-ec2-key`) or create a new one.
 7. **Network settings**:
-   - **Subnet**: Select **Don't include in launch template** *(The Auto Scaling Group will pick the subnets!)*.
+   - **Subnet**: Select **Don't include in launch template** _(The Auto Scaling Group will pick the subnets!)_.
    - **Security groups**: Select `production-ec2-app-sg` 🛡️.
 8. **Advanced details (Scroll to the very bottom)**:
    - Expand **Advanced details**.
@@ -121,19 +124,46 @@ networks:
     driver: bridge
 EOF
 
-# Replace with your actual RDS endpoint created in Step 5!
-echo "DB_HOST=REPLACE_WITH_YOUR_RDS_ENDPOINT" > .env
-echo "DB_PASSWORD=YourSecurePassword123" >> .env
+# -------------------------------------------------------------
+# Option A: Modern Production Approach (AWS Secrets Manager) 🔐
+# (Recommended: Zero hardcoded credentials + eliminates chicken-and-egg!)
+# -------------------------------------------------------------
+# If you created a secret in AWS Secrets Manager named "production/app/secrets":
+# SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id production/app/secrets --query SecretString --output text --region us-east-1)
+# echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+
+# -------------------------------------------------------------
+# Option B: Direct Environment File Configuration 📝
+# -------------------------------------------------------------
+# Replace with your actual Amazon RDS endpoint once created in Step 5!
+cat << 'ENVEOF' > .env
+DOCKER_USERNAME=agravi987
+IMAGE_TAG=latest
+DB_HOST=REPLACE_WITH_YOUR_RDS_ENDPOINT
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=YourSecurePassword123
+DB_NAME=devops_db
+ENVEOF
 
 docker compose pull
 docker compose up -d
 ```
+
+> [!TIP]
+> **What if you created this Launch Template before creating RDS?**
+> Don't worry! AWS Launch Templates have **built-in versioning**:
+> 1. Once you create your RDS in Step 5, copy the RDS endpoint.
+> 2. Go to **Launch Templates** $\rightarrow$ select `production-app-template` $\rightarrow$ **Actions** $\rightarrow$ **Modify template (Create new version)**.
+> 3. Update the `DB_HOST` line with the real endpoint $\rightarrow$ Save as **Version 2**.
+> 4. Set Version 2 as **Default**, and your Auto Scaling Group will automatically launch instances using the real database!
 
 9. Click **Create launch template**! 🎉
 
 ---
 
 ### Part 2: Create the Auto Scaling Group (ASG)
+
 1. In the left EC2 menu, scroll to the bottom $\rightarrow$ click **Auto Scaling Groups**.
 2. Click the orange **Create Auto Scaling group** button.
 3. **Step 1: Choose launch template or configuration**:
@@ -145,18 +175,18 @@ docker compose up -d
    - **Availability Zones and subnets**:
      - Check `private-app-subnet-1a` 🔒
      - Check `private-app-subnet-1b` 🔒  
-     *(Notice: We select our PRIVATE app subnets. The application servers are protected inside the private castle walls!)*
+       _(Notice: We select our PRIVATE app subnets. The application servers are protected inside the private castle walls!)_
    - Click **Next**.
 5. **Step 3: Configure advanced options**:
    - Under **Load balancing**, choose **Attach to an existing load balancer**.
    - Select **Choose from your load balancer target groups**.
    - **Existing target groups**: Select `production-tg`! 🎯
    - Under **Health checks**:
-     - Check ✅ **Turn on Elastic Load Balancing health checks** *(If the ALB marks an instance unhealthy, ASG replaces it automatically!)*
+     - Check ✅ **Turn on Elastic Load Balancing health checks** _(If the ALB marks an instance unhealthy, ASG replaces it automatically!)_
      - **Health check grace period**: `300` seconds.
    - Click **Next**.
 6. **Step 4: Configure group size and scaling policies**:
-   - **Desired capacity**: `2` (Runs 2 EC2 instances at all times)
+   - **Desired capacity**: `2` (Runs 2 EC2 instances at all times across AZs)
    - **Minimum capacity**: `2`
    - **Maximum capacity**: `4`
    - Under **Automatic scaling**: Choose **Target tracking scaling policy**:
@@ -167,17 +197,61 @@ docker compose up -d
 
 ---
 
+## 🔍 Checkpoints: How to Verify & See Everything Running Live
+
+Here is the exact checklist to verify your application and auto-scaling stack are healthy:
+
+### 1. Check EC2 Instances Status in Console
+- Go to **EC2** $\rightarrow$ **Instances**.
+- You will see two instances named `production-asg` with state **Running** 🟢.
+- Status check should show **2/2 checks passed**.
+
+### 2. Verify Container Startup Logs (Inside EC2)
+Connect to an instance via **EC2 Instance Connect** (or SSH) and check the bootstrap log:
+```bash
+# View the live User Data bootstrap log:
+sudo cat /var/log/user-data.log
+```
+*You will see Docker installing, pulling images, and starting containers!*
+
+### 3. Verify Docker Containers are Running
+On the EC2 instance, type:
+```bash
+docker ps
+```
+You should see both containers active:
+- `aws_frontend` (Port 80)
+- `aws_backend` (Port 5000)
+
+### 4. Test Local Container Health Endpoint
+On the EC2 instance, test the health check:
+```bash
+curl http://localhost/api/health
+```
+*Expected response*: `{"status":"UP","uptimeSeconds":...,"database":"connected"}` 🎉
+
+### 5. Check Target Group Health in AWS Console
+- Go to **EC2** $\rightarrow$ **Target Groups** $\rightarrow$ `production-tg` $\rightarrow$ **Targets** tab.
+- Both EC2 instances should show Health status: **Healthy** in green 🟢!
+
+### 6. Open the Application Load Balancer in Your Browser!
+- Go to **EC2** $\rightarrow$ **Load Balancers** $\rightarrow$ `production-alb`.
+- Copy the **DNS name** (e.g. `http://production-alb-123456.us-east-1.elb.amazonaws.com`).
+- Open it in your web browser:
+  **Your live React frontend will load, communicating through the ALB to your backend containers and Amazon RDS!** 🥳
+
+---
+
 ## 🧪 The "Chaos Monkey" Self-Healing Test!
 
 Want to see AWS self-healing with your own eyes?
 
 1. Go to the **EC2 Instances** dashboard.
-2. You will see 2 new instances running named `production-asg`.
-3. Select one of them $\rightarrow$ Click **Instance state** $\rightarrow$ **Terminate instance** 💥.
-4. Go back to **Auto Scaling Groups** $\rightarrow$ click on `production-asg` $\rightarrow$ **Activity tab**:
-   - You will see: *Instance was terminated (unhealthy).*
-   - Immediately followed by: *Launching a new EC2 instance to maintain desired capacity of 2!* 🪄
-5. Within 2 minutes, a new server is online, added to the ALB Target Group, and serving traffic!
+2. Select one of your two running instances $\rightarrow$ Click **Instance state** $\rightarrow$ **Terminate instance** 💥.
+3. Go to **Auto Scaling Groups** $\rightarrow$ click on `production-asg` $\rightarrow$ **Activity tab**:
+   - You will see: _Instance was terminated (unhealthy)._
+   - Followed by: _Launching a new EC2 instance to maintain desired capacity of 2!_ 🪄
+4. Within 2 minutes, a new server is online, passes health checks, and is added to the ALB Target Group automatically!
 
 ---
 
@@ -187,22 +261,20 @@ Want to see AWS self-healing with your own eyes?
 > Save your screenshots into `docs/screenshots/` and update these links:
 
 ### 🖼️ Screenshot 1: Launch Template with User Data Script
-<!-- Replace with your screenshot path once taken -->
-![Launch Template Created](./screenshots/09-ec2-launch-template.png)
-*Caption: production-app-template showing Ubuntu 24.04 AMI, t2.micro instance type, and production-ec2-app-sg.*
+
+![Launch Template with User Data Script](image-2.png)
 
 ### 🖼️ Screenshot 2: Auto Scaling Group Across Multi-AZ Private Subnets
-<!-- Replace with your screenshot path once taken -->
-![Auto Scaling Group](./screenshots/10-asg-instances-healthy.png)
-*Caption: production-asg showing 2 healthy instances distributed across private-app-subnet-1a and 1b.*
+
+![Auto Scaling Group Across Multi-AZ Private Subnets](image-3.png)
 
 ### 🖼️ Screenshot 3: Auto-Healing Activity History
-<!-- Replace with your screenshot path once taken -->
-![ASG Self Healing](./screenshots/11-asg-self-healing-activity.png)
-*Caption: ASG Activity tab recording automatic termination of failed instance and launch of replacement.*
+
+![Auto-Healing Activity History](image-4.png)
 
 ---
 
 ## ⏭️ Ready for Day 5?
-Now let's provision our managed, automated cloud database on Amazon RDS:  
+
+Now let's explore Amazon RDS PostgreSQL in depth, including automated backups and multi-AZ failovers:  
 👉 **[Go to Step 5: 05-rds-database-mastery.md](./05-rds-database-mastery.md)**

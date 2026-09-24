@@ -103,6 +103,20 @@ Instead of IP addresses, AWS allows you to use a **Security Group as the Source*
 
 ---
 
+## 🔍 Checkpoints: How to Verify the Firewall Chain
+
+1. **Verify Source References Security Group IDs (Not 0.0.0.0/0)**:
+   - Click on `production-ec2-app-sg` $\rightarrow$ **Inbound rules** tab:
+     - Check that the **Source** shows `sg-xxxx (production-alb-sg)` instead of an IP address!
+   - Click on `production-rds-db-sg` $\rightarrow$ **Inbound rules** tab:
+     - Check that the **Source** shows `sg-xxxx (production-ec2-app-sg)`!
+
+2. **Verify Zero Direct Database Exposure**:
+   - Notice that `production-rds-db-sg` has **NO rule** for `0.0.0.0/0`.
+   - Even if someone knows the RDS master password and endpoint, outside network packets are dropped at the hypervisor! 🛡️
+
+---
+
 ## 📸 Proof of Work: Screenshots
 
 > [!TIP]

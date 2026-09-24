@@ -78,7 +78,43 @@ Instead of typing AWS credentials inside the EC2 server, EC2 can wear an **IAM R
 
 ---
 
-### Part 3: Storing Static Assets & Backups in Amazon S3
+### Part 3: How EC2 Retrieves the Secret at Startup (The Magic Script)
+When the EC2 instance boots up, its User Data script runs these commands to pull the secret:
+
+```bash
+# 1. Fetch secret from Secrets Manager using the IAM role
+SECRET_JSON=$(aws secretsmanager get-secret-value \
+  --secret-id production/database/credentials \
+  --query SecretString \
+  --output text \
+  --region us-east-1)
+
+# 2. Extract database host and password into .env
+echo "DB_HOST=$(echo $SECRET_JSON | jq -r '.host')" >> /home/ubuntu/app/.env
+echo "DB_PASSWORD=$(echo $SECRET_JSON | jq -r '.password')" >> /home/ubuntu/app/.env
+echo "DB_USER=$(echo $SECRET_JSON | jq -r '.username')" >> /home/ubuntu/app/.env
+echo "DB_NAME=devops_db" >> /home/ubuntu/app/.env
+```
+
+---
+
+## 🔍 Checkpoints: How to Verify & See It Running
+
+1. **Test Secret Retrieval from EC2 Terminal**:
+   SSH or EC2 Instance Connect into your EC2 server and test:
+   ```bash
+   aws secretsmanager get-secret-value \
+     --secret-id production/database/credentials \
+     --region us-east-1
+   ```
+   *Expected Output*: Returns your secret JSON with username, password, and host! 🟢
+
+2. **Verify Zero Passwords on Disk**:
+   Notice that the launch template contains **zero plain-text passwords**. Only the secret ID is referenced!
+
+---
+
+### Part 4: Storing Static Assets & Backups in Amazon S3
 Amazon S3 (Simple Storage Service) is the cloud's infinite hard drive:
 
 1. Open the [Amazon S3 Console](https://console.aws.amazon.com/s3/).
