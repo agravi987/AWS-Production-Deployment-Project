@@ -1,69 +1,44 @@
-# 📈 Step 6: EC2 Launch Templates & Multi-AZ Auto Scaling (ASG)
+# 📈 Step 6: EC2 Launch Templates & Auto Scaling Groups (ASG)
 
-Welcome to **Step 6**! 📈  
-Today, you build the **self-healing, auto-scaling engine** of your cloud infrastructure.  
-Because you already created the **RDS Database in Step 3**, stored credentials in **Secrets Manager in Step 4**, and configured the **ALB in Step 5**, your servers will boot up, pull credentials securely, connect to the database, and register as healthy with zero manual intervention! 🪄
+🎯 **Mission**: Create an **EC2 Launch Template** with automated Secrets Manager bootstrap, and launch an **Auto Scaling Group** that runs your full-stack Docker containers across 2 Availability Zones.
 
 ---
 
-## 🤖 What is an Auto Scaling Group (ASG) & Self-Healing?
+## 💡 The Concept: Auto Scaling & Self-Healing
 
-In legacy systems, if an EC2 instance died at 3 AM on a weekend, an engineer had to be paged to wake up and manually rebuild it.  
-With AWS Auto Scaling Groups:
-1. **Desired Capacity**: The ASG maintains exactly the number of servers you specify (e.g. 2 instances across 2 Availability Zones).
-2. **Health Monitoring**: AWS tracks both EC2 hardware checks and ALB HTTP `/api/health` responses.
-3. **Automated Self-Healing**: If an instance crashes or becomes unhealthy, the ASG terminates the failed server and spins up a brand-new, healthy replacement within 2 minutes!
-
-```
-                  ┌─────────────────────────────────────────┐
-                  │    Auto Scaling Group (ASG) 📈          │
-                  │    Desired: 2 | Min: 2 | Max: 4         │
-                  └────────────────────┬────────────────────┘
-                                       │
-                    ┌──────────────────┴──────────────────┐
-                    ▼                                     ▼
-        Availability Zone A                    Availability Zone B
-  ┌───────────────────────────────┐     ┌───────────────────────────────┐
-  │ Private App Subnet 1A         │     │ Private App Subnet 1B         │
-  │ • EC2 App Instance #1         │     │ • EC2 App Instance #2         │
-  │   (Running Docker Containers) │     │   (Running Docker Containers) │
-  └───────────────────────────────┘     └───────────────────────────────┘
-```
+1. **Auto-Scaling**: If traffic surges, AWS adds more instances automatically.
+2. **Self-Healing**: If Server 1 dies or the container crashes, the ASG terminates the broken instance and launches a brand new healthy replacement within 2 minutes!
+3. **No IP Management**: You never manage or type EC2 IP addresses. The ASG registers instances dynamically into your Application Load Balancer!
 
 ---
 
-## 🖱️ Step-by-Step AWS Management Console Walkthrough
-
-### Part 1: Create the EC2 Launch Template
-
-A Launch Template is the master blueprint that defines the AMI, instance size, IAM profile, security group, and startup script for your fleet:
-
-1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/).
-2. In the left menu under **Instances**, click **Launch Templates** $\rightarrow$ Click **Create launch template**.
-3. **Launch template name and description**:
-   - **Launch template name**: `production-lt`
-   - **Template version description**: `v1 - Production App with Secrets Manager and Docker`
-   - Check the box ✅ **Auto Scaling guidance** *(Helps ensure compatibility with ASG)*.
-4. **Application and OS Images (Amazon Machine Image)**:
-   - Select **Ubuntu** $\rightarrow$ choose **Ubuntu Server 22.04 LTS (HVM), SSD Volume Type** (Free tier eligible).
-   - Architecture: `64-bit (x86)`.
-5. **Instance type**:
-   - Select `t2.micro` (or `t3.micro` depending on Free Tier in your region).
-6. **Key pair (login)**:
-   - Select an existing key pair or choose *Proceed without a key pair* (EC2 Instance Connect can be used).
-7. **Network settings**:
-   - Subnet: *Don't include in launch template* (the Auto Scaling Group will dictate subnet placement across AZs).
-   - **Security groups**: Select `production-ec2-app-sg` 🛡️.
-8. **Advanced details** (Expand this section at the bottom):
-   - **IAM instance profile**: Select `production-ec2-secrets-role` *(Created in Step 4!)* 🔑.
-   - Scroll down to the **User data** box.
+## 📋 What You Need to Know Before Starting
 
 > [!TIP]
-> ### 📋 What Values Do I Need to Customize vs What is Automated?
-> - **EC2 IP Addresses (`10.0.12.x`, etc.)**: **DO NOT hardcode any IP address!** EC2 instances in Auto Scaling get random private IPs assigned automatically. Traffic reaches them through the Application Load Balancer, and the ASG registers their IPs dynamically into the Target Group!
-> - **Docker Username**: Pre-configured to **`ravi0706`**!
-> - **Option A (Zero-Touch with Secrets Manager - Recommended)**: If you created the secret `production/database/credentials` in Step 4 and attached the IAM role, **YOU DO NOT NEED TO EDIT ANYTHING IN THIS SCRIPT!** It automatically detects the region, fetches your database endpoint and password, and writes `.env`!
-> - **Option B (Manual Fallback without Secrets Manager)**: If you did not create the secret in Step 4, simply edit line 37 (`DB_HOST="YOUR-RDS-ENDPOINT..."`) and line 40 (`DB_PASSWORD="YourPassword..."`) before pasting.
+> - **EC2 IP Addresses**: **NEVER hardcode any IP address.** Auto Scaling assigns private IPs dynamically.
+> - **Docker Images**: Configured to use Docker Hub user **`ravi0706`** (`ravi0706/devops-client` and `ravi0706/devops-server`).
+> - **Zero-Touch Script**: Because you configured **AWS Secrets Manager** in Step 4 and attach the IAM Role here, **you do NOT need to edit the script below!** It fetches your database endpoint and password automatically!
+
+---
+
+## 🖱️ Step-by-Step AWS Console Recipe
+
+### Part 1: Create Launch Template
+1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/) $\rightarrow$ click **Launch Templates** $\rightarrow$ Click **Create launch template**.
+2. **Details**:
+   - Name: `production-lt`
+   - Description: `v1 - Production App with Secrets Manager and Docker`
+   - Check ✅ **Auto Scaling guidance**.
+3. **OS Image**:
+   - Select **Ubuntu** $\rightarrow$ choose **Ubuntu Server 22.04 LTS (HVM)** (Free Tier).
+4. **Instance type**: `t2.micro` (or `t3.micro`).
+5. **Key pair**: Select your key pair or choose *Proceed without a key pair*.
+6. **Network settings**:
+   - Subnet: *Don't include in launch template*.
+   - Security groups: Select `production-ec2-app-sg` 🛡️.
+7. **Advanced details** (Expand at the bottom):
+   - **IAM instance profile**: Select `production-ec2-secrets-role` 🔑.
+   - Scroll down to the **User data** box and paste this exact script:
 
 ```bash
 #!/bin/bash
@@ -74,16 +49,14 @@ echo "=================================================================="
 echo "🚀 [$(date '+%Y-%m-%d %H:%M:%S')] Starting EC2 Production Bootstrap"
 echo "=================================================================="
 
-# 1. Update OS packages and install core dependencies
+# 1. Update OS packages and install tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y ca-certificates curl gnupg lsb-release jq awscli docker.io docker-compose
 
-# 2. Start and enable Docker
+# 2. Enable Docker and install Docker Compose v2 plugin
 systemctl enable --now docker
 usermod -aG docker ubuntu
-
-# Install modern Docker Compose v2 plugin
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -sSL "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
@@ -106,8 +79,7 @@ fi
 SECRET_NAME="production/database/credentials"
 echo "🔐 Fetching database secret [$SECRET_NAME] from AWS Secrets Manager..."
 
-# Manual fallback values (Only used if Secrets Manager is not configured):
-DB_HOST="YOUR-RDS-ENDPOINT.rds.amazonaws.com"
+DB_HOST="localhost"
 DB_PORT="5432"
 DB_USER="postgres"
 DB_PASSWORD="yoursecurepassword123"
@@ -185,7 +157,7 @@ EOF
 
 chown -R ubuntu:ubuntu "$APP_DIR"
 
-# 8. Pull images and launch application containers
+# 8. Pull Docker images and start application
 docker compose pull || docker-compose pull
 docker compose up -d || docker-compose up -d
 
@@ -194,108 +166,62 @@ sleep 10
 curl -s http://localhost/api/health || true
 echo "✅ EC2 Bootstrap Completed Successfully!"
 ```
-
-9. Click **Create launch template**! 🎉
-
----
-
-### Part 2: Create the Auto Scaling Group (ASG)
-
-1. In the left EC2 menu under **Auto Scaling**, click **Auto Scaling Groups**.
-2. Click the orange **Create Auto Scaling group** button.
-3. **Step 1: Choose launch template**:
-   - **Auto Scaling group name**: `production-asg`
-   - **Launch template**: Select `production-lt`.
-   - Click **Next**.
-4. **Step 2: Choose instance launch options**:
-   - **VPC**: Select `production-vpc`.
-   - **Availability Zones and subnets**: Check both private application subnets:
-     - `private-app-subnet-1a`
-     - `private-app-subnet-1b`
-   - Click **Next**.
-5. **Step 3: Configure advanced options**:
-   - **Load balancing**: Select **Attach to an existing load balancer**.
-   - Select **Choose from your load balancer target groups** $\rightarrow$ select `production-tg`!
-   - **Health checks**:
-     - Check ✅ **Turn on Elastic Load Balancing health checks**.
-     - Health check grace period: `300` seconds (allows Docker time to pull images).
-   - Click **Next**.
-6. **Step 4: Configure group size and scaling policies**:
-   - **Desired capacity**: `2`
-   - **Minimum capacity**: `2`
-   - **Maximum capacity**: `4`
-   - Click **Next** $\rightarrow$ Click **Next** through notifications and tags.
-7. Click **Create Auto Scaling group**! 🚀
+8. Click **Create launch template**! 🎉
 
 ---
 
-## 🔍 Checkpoints: How to Verify & See Everything Running Live
+### Part 2: Create Auto Scaling Group (ASG)
+1. In the EC2 left menu, click **Auto Scaling Groups** $\rightarrow$ Click **Create Auto Scaling group**.
+2. **Name**: `production-asg` | Launch template: `production-lt` $\rightarrow$ Click **Next**.
+3. **Network**:
+   - VPC: `production-vpc`.
+   - Subnets: Check both application subnets (`private-app-subnet-1a` and `private-app-subnet-1b` or `public-subnet-1a` and `1b`).
+   - Click **Next**.
+4. **Load balancing**:
+   - Select **Attach to an existing load balancer**.
+   - Select **Choose from your load balancer target groups** $\rightarrow$ choose `production-tg`!
+   - Health checks: Check ✅ **Turn on Elastic Load Balancing health checks**.
+   - Grace period: `300` seconds.
+   - Click **Next**.
+5. **Group size**:
+   - Desired: `2` | Minimum: `2` | Maximum: `4`.
+   - Click **Next** through remaining steps $\rightarrow$ Click **Create Auto Scaling group**! 🚀
 
-### 1. Check EC2 Instances Status in Console
-- Go to **EC2** $\rightarrow$ **Instances**.
-- You will see two instances named `production-asg` with state **Running** 🟢.
+---
 
-### 2. Verify Container Startup Logs (Inside EC2)
-Connect to an instance via **EC2 Instance Connect** and view the bootstrap log:
-```bash
-sudo cat /var/log/user-data.log
-```
-*You will see Docker installing, secret fetched from Secrets Manager, and containers launching!*
+## 🔍 Checkpoints: How to Verify & See It Running
 
-### 3. Verify Docker Containers are Running
-```bash
-docker ps
-```
-Both containers will be online:
-- `aws_frontend` (Port 80)
-- `aws_backend` (Port 5000)
-
-### 4. Test Local Container Health Endpoint
-```bash
-curl http://localhost/api/health
-```
-*Expected response*:
-```json
-{"status":"UP","uptimeSeconds":15,"database":"connected"}
-```
-
-### 5. Check Target Group Health in AWS Console
-- Go to **EC2** $\rightarrow$ **Target Groups** $\rightarrow$ `production-tg` $\rightarrow$ **Targets** tab.
-- Both EC2 instances will display Health status: **Healthy** in green 🟢!
-
-### 6. Open the Application Load Balancer in Your Browser!
-- Go to **EC2** $\rightarrow$ **Load Balancers** $\rightarrow$ select `production-alb`.
-- Copy the **DNS name** (e.g. `http://production-alb-123456.us-east-1.elb.amazonaws.com`).
-- Paste it into your browser address bar:  
-  **Your live React frontend will load, connected through the ALB to your backend containers and Amazon RDS!** 🥳
+1. **Check EC2 Instances**:
+   - Go to **EC2** $\rightarrow$ **Instances**. Two instances named `production-asg` will show **Running** 🟢.
+2. **Verify Inside EC2**:
+   - Connect via EC2 Instance Connect:
+     ```bash
+     docker ps
+     curl http://localhost/api/health
+     ```
+   - *Expected output*: `{"status":"UP","database":"connected"}` 🎉
+3. **Check Target Group**:
+   - Go to **Target Groups** $\rightarrow$ `production-tg` $\rightarrow$ Targets tab: Both instances show **Healthy** 🟢!
+4. **Open in Browser**:
+   - Open your ALB DNS Name in your web browser:  
+     `http://production-alb-123456789.us-east-1.elb.amazonaws.com`  
+     **Your live React frontend and backend connected to Amazon RDS will load!** 🥳
 
 ---
 
 ## 🧪 The "Chaos Monkey" Self-Healing Test!
 
-1. Go to **EC2** $\rightarrow$ **Instances**.
-2. Select one of your two running instances $\rightarrow$ Click **Instance state** $\rightarrow$ **Terminate instance** 💥.
-3. Navigate to **Auto Scaling Groups** $\rightarrow$ click `production-asg` $\rightarrow$ **Activity** tab:
-   - You will see: *Instance terminated (unhealthy).*
-   - Followed by: *Launching a new EC2 instance to maintain desired capacity of 2!* 🪄
-4. Within 2 minutes, a replacement instance is provisioned, bootstrapped, and registered into the ALB Target Group automatically!
+1. Go to **EC2** $\rightarrow$ **Instances** $\rightarrow$ select one running instance $\rightarrow$ Click **Terminate instance** 💥.
+2. Go to **Auto Scaling Groups** $\rightarrow$ `production-asg` $\rightarrow$ **Activity** tab:
+   - Within 2 minutes, ASG automatically detects the terminated instance and provisions a fresh replacement to maintain your desired capacity of 2! 🪄
 
 ---
 
-## 🛠️ Troubleshooting: "Network is unreachable" or "Package docker.io has no installation candidate"
+## 🛠️ Troubleshooting: "101: Network is unreachable"
 
-If you inspect `/var/log/user-data.log` and see:
-`Cannot initiate the connection to security.ubuntu.com:80 ... connect (101: Network is unreachable)`:
-- **Cause**: The subnet selected in your Auto Scaling Group does not have an outbound route to the Internet Gateway, or does not have Auto-assign Public IP enabled. Without outbound internet access, the EC2 instance cannot download OS packages or Docker images!
-- **Quick Fix**:
-  1. Go to **VPC Console** $\rightarrow$ **Route Tables** $\rightarrow$ select `public-route-table` (which has route `0.0.0.0/0 -> production-igw`).
-  2. Click **Subnet associations** $\rightarrow$ **Edit subnet associations** $\rightarrow$ Check the subnets used by your ASG (`private-app-subnet-1a` and `private-app-subnet-1b` or `public-subnet-1a` and `1b`) $\rightarrow$ Click **Save associations**.
-  3. Go to **Subnets** $\rightarrow$ Select those subnets $\rightarrow$ **Actions** $\rightarrow$ **Edit subnet settings** $\rightarrow$ Check **Enable auto-assign public IPv4 address** $\rightarrow$ Click **Save**.
-  4. Terminate the failing instance or rerun:
-     ```bash
-     sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/agravi987/AWS-Production-Deployment-Project/main/app/user-data.sh)"
-     ```
-  *(Remember: Your application servers are 100% secure because `production-ec2-app-sg` drops all public incoming traffic; only the ALB is allowed in!)*
+If `/var/log/user-data.log` reports `connect (101: Network is unreachable)`:
+- Go to **VPC Console** $\rightarrow$ **Route Tables** $\rightarrow$ `public-route-table` (which has `0.0.0.0/0 -> production-igw`).
+- Ensure your ASG subnets are associated with this route table so instances can download Docker packages and pull images from Docker Hub!
 
 ---
 
@@ -314,5 +240,5 @@ If you inspect `/var/log/user-data.log` and see:
 
 ## ⏭️ Ready for Step 7?
 
-Now let's configure a custom domain name with Route 53 and enable HTTPS encryption with AWS Certificate Manager:  
+Now let's configure your custom domain name with Route 53 and enable free HTTPS:  
 👉 **[Go to Step 7: 07-route53-and-https.md](./07-route53-and-https.md)**

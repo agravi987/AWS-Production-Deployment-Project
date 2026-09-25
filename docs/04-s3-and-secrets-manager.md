@@ -1,148 +1,91 @@
-# 🔐 Step 4: AWS Secrets Manager & Amazon S3 Integration
+# 🔐 Step 4: AWS Secrets Manager & S3 Storage
 
-Welcome to **Step 4**! 🔐  
-In this step, you will eliminate hardcoded passwords forever using **AWS Secrets Manager** and create an **IAM Instance Profile** so your EC2 servers can securely fetch database credentials at boot time with **zero hardcoded keys**.
-
----
-
-## 🚫 Why Hardcoding Passwords in User Data is Dangerous
-
-If you put your database password or host endpoint directly inside a Git repository or plaintext script:
-
-- Anyone with read access to the repo or launch template can read the credentials.
-- Automated bots scan public commits 24/7.
-- If you rotate your database password, you have to recreate or edit all scripts manually!
-
-### 💡 The Solution: AWS Secrets Manager + EC2 IAM Role
-
-```
-┌─────────────────────────────────┐
-│     [AWS Secrets Manager]       │
-│  Secret:                        │
-│  production/database/credentials│
-│  (KMS Encrypted 🔐)             │
-└────────────────┬────────────────┘
-                 │
-                 │ 1. EC2 boots and assumes IAM Role
-                 │ 2. aws secretsmanager get-secret-value
-                 ▼
-┌─────────────────────────────────┐
-│  [EC2 Auto Scaling Instance]    │
-│  • Reads DB_HOST & DB_PASSWORD  │
-│  • Generates /home/ubuntu/.env  │
-│  • Starts containers cleanly!   │
-└─────────────────────────────────┘
-```
+🎯 **Mission**: Store your database credentials in **AWS Secrets Manager** and create an **IAM Role** so your EC2 application servers can fetch them at boot time with zero hardcoded passwords.
 
 ---
 
-## 🖱️ Step-by-Step AWS Management Console Walkthrough
+## 💡 The Concept: Zero-Secret Hardcoding
 
-### Part 1: Store Database Credentials in AWS Secrets Manager
+If you write database passwords into a Git repository or plaintext script, scanners will steal them.  
+With **AWS Secrets Manager + IAM Roles**:
+1. You store the RDS endpoint and password in an encrypted vault.
+2. The EC2 instance assumes an **IAM Role** (like an employee badge).
+3. The instance reads the database credentials securely at boot time without saving any secret keys on disk!
 
+---
+
+## 📋 Copy-Paste Configuration Table
+
+| Resource | Name to Use | Key Values |
+| :--- | :--- | :--- |
+| **AWS Secret** | `production/database/credentials` | User: `postgres`, Password: *Your DB Password*, DB: `production-postgres` |
+| **IAM Role** | `production-ec2-secrets-role` | Use case: **EC2**, Policy: `SecretsManagerReadWrite` |
+| **S3 Bucket** | `production-app-assets-yourname` | Region: `us-east-1`, Block Public Access: **Checked** ✅ |
+
+---
+
+## 🖱️ Step-by-Step AWS Console Recipe
+
+### 1. Store Credentials in Secrets Manager
 1. Open the [AWS Secrets Manager Console](https://console.aws.amazon.com/secretsmanager/).
-2. Click the orange **Store a new secret** button.
-3. **Secret type**:
-   - Choose **Credentials for Amazon RDS database** 🐘 (or **Other type of secret**).
-   - If choosing **Credentials for Amazon RDS database**:
-     - **User name**: `postgres`
-     - **Password**: The master password you created in Step 3.
-     - **Encryption key**: `aws/secretsmanager` (Default AWS managed key).
-     - **Database**: Select `production-postgres`.
-   - _(Alternatively, if using key/value pairs under "Other type of secret"):_
-     - Key `DB_HOST`: `<paste your RDS endpoint from Step 3>`
-     - Key `DB_PORT`: `5432`
-     - Key `DB_USER`: `postgres`
-     - Key `DB_PASSWORD`: `<your master password>`
-     - Key `DB_NAME`: `devops_db`
+2. Click **Store a new secret**.
+3. Choose **Credentials for Amazon RDS database** 🐘:
+   - User name: `postgres`
+   - Password: Enter your master RDS password from Step 3.
+   - Encryption key: `aws/secretsmanager` (Default).
+   - Database: Select `production-postgres`.
 4. Click **Next**.
-5. **Configure secret**:
-   - **Secret name**: `production/database/credentials` _(Exact name used by our user-data script!)_
-   - **Description**: `PostgreSQL credentials for production application`
-6. Click **Next** $\rightarrow$ Click **Next** through automatic rotation (keep disabled for simplicity) $\rightarrow$ Click **Store**! 🔒
+5. **Secret name**: `production/database/credentials` *(Use this exact name!)*.
+6. Click **Next** $\rightarrow$ Click **Next** through rotation $\rightarrow$ Click **Store**! 🔒
 
 ---
 
-### Part 2: Create an IAM Role for EC2
-
-Your EC2 instances need AWS permission to read this secret. In AWS, you grant permissions using an **IAM Role**:
-
-1. Open the [AWS IAM Console](https://console.aws.amazon.com/iam/).
-2. In the left navigation menu, click **Roles** $\rightarrow$ Click **Create role**.
-3. **Select trusted entity**:
-   - Trusted entity type: **AWS service**
-   - Use case: Select **EC2** $\rightarrow$ Click **Next**.
-4. **Add permissions**:
+### 2. Create IAM Role for EC2
+1. Open the [AWS IAM Console](https://console.aws.amazon.com/iam/) $\rightarrow$ click **Roles**.
+2. Click **Create role**:
+   - Trusted entity: **AWS service** $\rightarrow$ Use case: **EC2**.
+   - Click **Next**.
+3. Add permissions:
    - In the search bar, type: `SecretsManagerReadWrite`.
    - Check the box ✅ `SecretsManagerReadWrite`.
-   - _(Optional: Also search and check `CloudWatchAgentServerPolicy` for metrics)_.
    - Click **Next**.
-5. **Name, review, and create**:
+4. Role details:
    - **Role name**: `production-ec2-secrets-role`
-   - **Description**: `Allows EC2 instances to read production database credentials`
-6. Click **Create role**! 🎉
+5. Click **Create role**! 🎉
 
 ---
 
-### Part 3: Create a Private Amazon S3 Bucket
-
-Amazon S3 (Simple Storage Service) provides 99.999999999% (11 9's) data durability for application uploads, assets, and logs:
-
+### 3. Create Private S3 Bucket (Optional Cloud Storage)
 1. Open the [Amazon S3 Console](https://console.aws.amazon.com/s3/).
-2. Click the orange **Create bucket** button.
-3. General configuration:
-   - **Bucket name**: `production-app-assets-devops-yourname` _(Must be globally unique across all AWS accounts!)_.
-   - **AWS Region**: Select the same region (e.g. `us-east-1`).
-4. **Block Public Access settings for this bucket**:
-   - Keep ✅ **Block _all_ public access** checked! _(Private S3 buckets must never be exposed publicly)_.
-5. **Bucket Versioning**:
-   - Select **Enable** _(Protects against accidental deletions or file overwrites)_.
-6. Click **Create bucket**! 📦
+2. Click **Create bucket**:
+   - **Bucket name**: `production-app-assets-devops-yourname` *(Must be globally unique!)*.
+   - Region: Same region (e.g. `us-east-1`).
+   - Block Public Access: Keep ✅ **Block *all* public access** checked!
+3. Click **Create bucket**! 📦
 
 ---
 
-## 🔍 Checkpoints: How to Verify Secret Storage
+## 🔍 Checkpoints: How to Verify
 
-### 1. Inspect Secret in Secrets Manager Console
-
-- In the Secrets Manager Console, click on `production/database/credentials`.
-- Under the **Secret value** section, click **Retrieve secret value**.
-- Confirm that your database username, password, and endpoint are accurately stored.
-
-### 2. Verify IAM Role Trust Relationship
-
-- In the IAM Console $\rightarrow$ click **Roles** $\rightarrow$ select `production-ec2-secrets-role`.
-- Click the **Trust relationships** tab. You should see:
-  ```json
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": { "Service": "ec2.amazonaws.com" },
-        "Action": "sts:AssumeRole"
-      }
-    ]
-  }
-  ```
+1. In the Secrets Manager Console, click `production/database/credentials`.
+2. Click **Retrieve secret value**:
+   - You should see `username`, `password`, and `host` (your RDS endpoint) listed cleanly!
 
 ---
 
 ## 📸 Proof of Work: Screenshots
 
-### 🖼️ Screenshot 1: Database Secret Stored in Secrets Manager
+### 🖼️ Screenshot 1: Database Secret Stored
+<!-- Capture screenshot in Secrets Manager showing production/database/credentials -->
+`docs/screenshots/17-secrets-manager-stored.png`
 
-![Database Secret Stored in Secrets Manager](image-2.png)
+### 🖼️ Screenshot 2: IAM Role Created
+<!-- Capture screenshot in IAM console showing production-ec2-secrets-role -->
+`docs/screenshots/18-iam-role-secrets-manager.png`
 
-### 🖼️ Screenshot 2: IAM Role Created for EC2
-
-![IAM Role Created for EC2](image-3.png)
-
-### 🖼️ Screenshot 3: Private S3 Bucket Created
-
-## ![Private S3 Bucket Created](image-4.png)
+---
 
 ## ⏭️ Ready for Step 5?
 
-Now that the database and credentials vault are provisioned, let's create the Application Load Balancer and Target Group:  
+Now let's configure your Application Load Balancer and health checks:  
 👉 **[Go to Step 5: 05-application-load-balancer.md](./05-application-load-balancer.md)**

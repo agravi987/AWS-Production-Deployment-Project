@@ -1,112 +1,76 @@
 # ⚖️ Step 5: Application Load Balancer (ALB) Mastery
 
-Welcome to **Step 5**! ⚖️  
-In production cloud environments, client browsers should never communicate directly with individual server IP addresses.  
-Instead, an **Application Load Balancer (ALB)** acts as the high-availability traffic director sitting in front of your application fleet.
+🎯 **Mission**: Create a **Target Group** that checks application health on `/api/health`, and launch an **Application Load Balancer (ALB)** across public subnets to distribute incoming user traffic.
 
 ---
 
-## 🎯 Why Do We Use an Application Load Balancer?
+## 💡 The Concept: Why Do We Need a Load Balancer?
 
-```
-                     Users & Browsers 🌐
-                             │
-                             ▼
-             ┌───────────────────────────────┐
-             │ Application Load Balancer ⚖️  │  • Single DNS entry point
-             │   (Public Subnets 1a & 1b)    │  • Terminate HTTPS / SSL certificates
-             └───────────────┬───────────────┘  • Automated continuous health checks
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-       EC2 Instance #1               EC2 Instance #2
-    (Private Subnet 1a)           (Private Subnet 1b)
-```
-
-### 🌟 4 Superpowers of the ALB:
-1. **Traffic Distribution**: Balances incoming requests evenly so no single EC2 instance is overloaded.
-2. **Multi-AZ High Availability**: Deployed redundantly across Public Subnet 1A and Public Subnet 1B.
-3. **Automated Health Probing**: Regularly pings `/api/health`. If an EC2 instance crashes, the ALB instantly stops sending traffic to it until it recovers!
-4. **SSL/TLS Offloading**: Manages domain SSL certificates in one central place without consuming server CPU cycles.
+Instead of giving users individual EC2 IP addresses that change constantly, an ALB provides:
+1. **One Permanent DNS Entry Point**: Clients connect to the ALB URL.
+2. **Automated Health Probing**: Regularly pings `/api/health`. If Server 1 dies, 100% of user traffic is instantly shifted to Server 2 without downtime!
+3. **Multi-AZ Availability**: Distributes requests evenly across `us-east-1a` and `us-east-1b`.
 
 ---
 
-## 🧩 The 3 Core Pieces of Load Balancing
+## 📋 Copy-Paste Configuration Table
 
-| Component | What It Does | Real-World Analogy |
+| Resource | Setting | Value to Choose |
 | :--- | :--- | :--- |
-| **Listener** 👂 | Listens on a port (e.g., HTTP 80 or HTTPS 443) for incoming traffic. | The receptionist answering incoming phone calls. |
-| **Rules** 📋 | Decides where to forward each request based on path or host headers. | The call routing menu ("Press 1 for Support"). |
-| **Target Group** 🎯 | The pool of backend servers (EC2 instances) that process requests. | The customer service agents handling the calls. |
+| **Target Group** | Name | `production-tg` |
+| | Target Type | **Instances** 💻 |
+| | Protocol / Port | `HTTP` : `80` |
+| | VPC | `production-vpc` |
+| | Health Check Path | `/api/health` 🩺 |
+| **Load Balancer** | Name | `production-alb` |
+| | Scheme | **Internet-facing** 🌐 |
+| | VPC | `production-vpc` |
+| | Subnets | `public-subnet-1a` & `public-subnet-1b` |
+| | Security Group | `production-alb-sg` 🛡️ |
+| | Listener | `HTTP:80` forwarding to `production-tg` |
 
 ---
 
-## 🖱️ Step-by-Step AWS Management Console Walkthrough
+## 🖱️ Step-by-Step AWS Console Recipe
 
-### Part 1: Create the Target Group
-
-The Target Group defines *where* to forward incoming traffic and *how* to monitor backend health:
-
-1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/).
-2. In the left navigation menu under **Load Balancing**, click **Target Groups**.
-3. Click the orange **Create target group** button.
-4. **Step 1: Specify group details**:
-   - **Target type**: Select **Instances** 💻.
-   - **Target group name**: `production-tg`
-   - **Protocol**: `HTTP` | **Port**: `80`
-   - **IP address type**: `IPv4`
-   - **VPC**: Select `production-vpc`.
-   - **Protocol version**: `HTTP1`
-5. **Health checks configuration**:
-   - **Health check protocol**: `HTTP`
-   - **Health check path**: `/api/health` 🩺 *(Our backend health check endpoint!)*
-   - Expand **Advanced health check settings**:
-     - **Healthy threshold**: `2` (Consecutive successful probes before marking instance healthy)
-     - **Unhealthy threshold**: `2` (Consecutive failed probes before removing traffic)
-     - **Timeout**: `5` seconds
-     - **Interval**: `15` seconds
-     - **Success codes**: `200`
-6. Click **Next**.
-7. **Step 2: Register targets**:
-   - Since our Auto Scaling Group will register instances automatically in Step 6, skip manual instance selection and click **Create target group**! 🎉
+### 1. Create Target Group
+1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/) $\rightarrow$ under **Load Balancing**, click **Target Groups**.
+2. Click **Create target group**:
+   - Target type: Select **Instances**.
+   - Target group name: `production-tg`.
+   - Protocol: `HTTP` | Port: `80` | VPC: `production-vpc`.
+3. Health checks:
+   - Health check path: `/api/health` *(Our backend health check endpoint)*.
+4. Click **Next** $\rightarrow$ Click **Create target group**! 🎉  
+   *(Do not manually register instances now; Auto Scaling does this automatically in Step 6)*.
 
 ---
 
-### Part 2: Create the Application Load Balancer
-
-1. In the left EC2 menu under **Load Balancing**, click **Load Balancers** $\rightarrow$ Click **Create load balancer**.
-2. Under **Application Load Balancer**, click **Create**.
-3. **Basic configuration**:
-   - **Load balancer name**: `production-alb`
-   - **Scheme**: Select **Internet-facing** 🌐 *(Accepts traffic from the public web)*.
-   - **IP address type**: `IPv4`.
-4. **Network mapping**:
-   - **VPC**: Select your `production-vpc`.
-   - **Mappings (Select 2 Availability Zones)**:
-     - Check Zone 1 (e.g., `us-east-1a`) $\rightarrow$ Select `public-subnet-1a`.
-     - Check Zone 2 (e.g., `us-east-1b`) $\rightarrow$ Select `public-subnet-1b`.
-5. **Security groups**:
-   - Remove the default security group.
-   - Select: `production-alb-sg` 🛡️.
-6. **Listeners and routing**:
-   - **Protocol**: `HTTP` | **Port**: `80`.
-   - **Default action**: Forward to $\rightarrow$ Select `production-tg`.
-7. Click **Create load balancer** at the bottom! 🚀
+### 2. Create Application Load Balancer
+1. In the left EC2 menu, click **Load Balancers** $\rightarrow$ Click **Create load balancer**.
+2. Under **Application Load Balancer**, click **Create**:
+   - Load balancer name: `production-alb`
+   - Scheme: **Internet-facing** 🌐
+   - IP address type: `IPv4`
+3. Network mapping:
+   - VPC: `production-vpc`
+   - Mappings: Select both AZs:
+     - Check `us-east-1a` $\rightarrow$ select `public-subnet-1a`
+     - Check `us-east-1b` $\rightarrow$ select `public-subnet-1b`
+4. Security groups:
+   - Remove default $\rightarrow$ select `production-alb-sg` 🛡️.
+5. Listeners and routing:
+   - Protocol: `HTTP` | Port: `80`
+   - Default action: Forward to $\rightarrow$ `production-tg`.
+6. Click **Create load balancer**! 🚀
 
 ---
 
-## 🔍 Checkpoints: How to Verify & See It Running
+## 🔍 Checkpoints: How to Verify
 
-### 1. Verify ALB State is Active
-- In the **Load Balancers** table, check the **State** column for `production-alb`.
-- It will transition from *Provisioning* to **Active** with a green icon 🟢 (takes about 2 minutes).
-
-### 2. Copy the ALB Public DNS Name
-- Select `production-alb` $\rightarrow$ under the **Description** tab, locate **DNS name**:
-  ```text
-  production-alb-123456789.us-east-1.elb.amazonaws.com
-  ```
-- Keep this DNS name handy; once our Auto Scaling Group launches instances in Step 6, this URL will serve your full-stack web application!
+1. In the **Load Balancers** list, check the **State** column for `production-alb`.
+2. Wait until it changes from *Provisioning* to **Active** 🟢 (takes ~2 minutes).
+3. Copy the **DNS name** (e.g. `production-alb-123456789.us-east-1.elb.amazonaws.com`). This will be your application's public URL once instances launch!
 
 ---
 
@@ -122,5 +86,5 @@ The Target Group defines *where* to forward incoming traffic and *how* to monito
 
 ## ⏭️ Ready for Step 6?
 
-Now let's create the Auto Scaling Group and Launch Template that automatically boots EC2 instances and connects to this Target Group:  
+Now let's launch the Auto Scaling Group that deploys our Docker compute fleet to this Target Group:  
 👉 **[Go to Step 6: 06-ec2-launch-template-asg.md](./06-ec2-launch-template-asg.md)**
