@@ -7,7 +7,7 @@
 services:
   # 1. Express Backend REST API
   server:
-    image: ${DOCKER_USERNAME:-agravi987}/devops-server:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME:-ravi0706}/devops-server:${IMAGE_TAG:-latest}
     container_name: aws_backend
     restart: always
     environment:
@@ -26,7 +26,7 @@ services:
 
   # 2. React Frontend (Nginx Reverse Proxy on Port 80)
   client:
-    image: ${DOCKER_USERNAME:-agravi987}/devops-client:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME:-ravi0706}/devops-client:${IMAGE_TAG:-latest}
     container_name: aws_frontend
     restart: always
     ports:

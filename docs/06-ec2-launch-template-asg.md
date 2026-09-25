@@ -128,7 +128,7 @@ fi
 
 # 6. Generate production .env configuration
 cat <<EOF > "$APP_DIR/.env"
-DOCKER_USERNAME=agravi987
+DOCKER_USERNAME=ravi0706
 IMAGE_TAG=latest
 PORT=5000
 NODE_ENV=production
@@ -143,7 +143,7 @@ EOF
 cat << 'EOF' > "$APP_DIR/docker-compose.yml"
 services:
   server:
-    image: ${DOCKER_USERNAME:-agravi987}/devops-server:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME:-ravi0706}/devops-server:${IMAGE_TAG:-latest}
     container_name: aws_backend
     restart: always
     environment:
@@ -160,7 +160,7 @@ services:
       - app_network
 
   client:
-    image: ${DOCKER_USERNAME:-agravi987}/devops-client:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME:-ravi0706}/devops-client:${IMAGE_TAG:-latest}
     container_name: aws_frontend
     restart: always
     ports:
