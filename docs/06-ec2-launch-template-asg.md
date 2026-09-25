@@ -274,16 +274,33 @@ curl http://localhost/api/health
 
 ---
 
+## 🛠️ Troubleshooting: "Network is unreachable" or "Package docker.io has no installation candidate"
+
+If you inspect `/var/log/user-data.log` and see:
+`Cannot initiate the connection to security.ubuntu.com:80 ... connect (101: Network is unreachable)`:
+- **Cause**: The subnet selected in your Auto Scaling Group does not have an outbound route to the Internet Gateway, or does not have Auto-assign Public IP enabled. Without outbound internet access, the EC2 instance cannot download OS packages or Docker images!
+- **Quick Fix**:
+  1. Go to **VPC Console** $\rightarrow$ **Route Tables** $\rightarrow$ select `public-route-table` (which has route `0.0.0.0/0 -> production-igw`).
+  2. Click **Subnet associations** $\rightarrow$ **Edit subnet associations** $\rightarrow$ Check the subnets used by your ASG (`private-app-subnet-1a` and `private-app-subnet-1b` or `public-subnet-1a` and `1b`) $\rightarrow$ Click **Save associations**.
+  3. Go to **Subnets** $\rightarrow$ Select those subnets $\rightarrow$ **Actions** $\rightarrow$ **Edit subnet settings** $\rightarrow$ Check **Enable auto-assign public IPv4 address** $\rightarrow$ Click **Save**.
+  4. Terminate the failing instance or rerun:
+     ```bash
+     sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/agravi987/AWS-Production-Deployment-Project/main/app/user-data.sh)"
+     ```
+  *(Remember: Your application servers are 100% secure because `production-ec2-app-sg` drops all public incoming traffic; only the ALB is allowed in!)*
+
+---
+
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: Launch Template with User Data Script
-![Launch Template with User Data Script](./screenshots/14-ec2-launch-template.png)
+![Launch Template with User Data Script](./image-2.png)
 
 ### 🖼️ Screenshot 2: Auto Scaling Group Across Multi-AZ Private Subnets
-![Auto Scaling Group Across Multi-AZ Private Subnets](./screenshots/15-asg-instances-healthy.png)
+![Auto Scaling Group Across Multi-AZ Private Subnets](./image-3.png)
 
 ### 🖼️ Screenshot 3: Auto-Healing Activity History
-![Auto-Healing Activity History](./screenshots/16-asg-self-healing-activity.png)
+![Auto-Healing Activity History](./image-4.png)
 
 ---
 

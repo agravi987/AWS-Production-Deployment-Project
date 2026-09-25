@@ -118,10 +118,12 @@ Create each subnet with the exact settings below:
 Click **Create subnet**.
 
 > [!IMPORTANT]
-> **Enable Auto-Assign Public IP for Public Subnets**:
+> **Enable Auto-Assign Public IP for Public & Application Subnets**:
+> For EC2 instances to run `apt-get install` and `docker pull` without an expensive paid NAT Gateway ($33/month), they need outbound internet access via the Internet Gateway (while remaining 100% protected inbound by your Security Group!).
 > 1. In the Subnets list, select `public-subnet-1a` $\rightarrow$ Click **Actions** $\rightarrow$ **Edit subnet settings**.
 > 2. Check the box ✅ **Enable auto-assign public IPv4 address** $\rightarrow$ Click **Save**.
-> 3. Repeat this for `public-subnet-1b`.
+> 3. Repeat this for `public-subnet-1b`, `private-app-subnet-1a`, and `private-app-subnet-1b`.
+> *(Leave `private-db-subnet-1a` and `private-db-subnet-1b` set to NO public IP!)*
 
 ---
 
@@ -136,9 +138,9 @@ An Internet Gateway acts as the bridge connecting your VPC to the public interne
 
 ---
 
-### Part 4: Configure Public & Private Route Tables
+### Part 4: Configure Route Tables (Application vs Database)
 
-#### 1. Public Route Table:
+#### 1. Public / Application Route Table (With Internet Access):
 1. In the left menu, click **Route Tables** $\rightarrow$ Click **Create route table**.
 2. **Name**: `public-route-table` $\rightarrow$ Select `production-vpc` $\rightarrow$ Click **Create**.
 3. Click the **Routes** tab $\rightarrow$ Click **Edit routes**.
@@ -147,19 +149,26 @@ An Internet Gateway acts as the bridge connecting your VPC to the public interne
    - **Target**: Select **Internet Gateway** $\rightarrow$ choose `production-igw`.
    - Click **Save changes**.
 5. Click the **Subnet associations** tab $\rightarrow$ Click **Edit subnet associations**.
-6. Check both `public-subnet-1a` and `public-subnet-1b` $\rightarrow$ Click **Save associations**.
+6. Check the 4 subnets that need outbound internet access:
+   - ✅ `public-subnet-1a`
+   - ✅ `public-subnet-1b`
+   - ✅ `private-app-subnet-1a`
+   - ✅ `private-app-subnet-1b`
+7. Click **Save associations**.
 
-#### 2. Private Route Table:
+#### 2. Database Private Route Table (Zero Internet Exposure):
 1. Click **Create route table**.
-2. **Name**: `private-route-table` $\rightarrow$ Select `production-vpc` $\rightarrow$ Click **Create**.
+2. **Name**: `database-private-route-table` $\rightarrow$ Select `production-vpc` $\rightarrow$ Click **Create**.
 3. Click the **Subnet associations** tab $\rightarrow$ Click **Edit subnet associations**.
-4. Check all 4 private subnets:
-   - `private-app-subnet-1a`
-   - `private-app-subnet-1b`
-   - `private-db-subnet-1a`
-   - `private-db-subnet-1b`
+4. Check only the 2 database subnets:
+   - ✅ `private-db-subnet-1a`
+   - ✅ `private-db-subnet-1b`
 5. Click **Save associations**.  
-   *(Notice: The private route table has NO route to the Internet Gateway, keeping your database and private servers completely isolated!)* 🛡️
+   *(Notice: The database route table has NO route to the Internet Gateway. Your PostgreSQL database has zero internet access and can only be reached internally from your EC2 application servers!)* 🛡️
+
+> [!NOTE]
+> **Enterprise Tip (NAT Gateway vs Internet Gateway)**:  
+> In multi-million dollar corporate setups, companies deploy an **AWS NAT Gateway** ($32.40/month + data charges) so private instances have outbound internet access without public IPs. For learning on the **AWS Free Tier ($0.00)**, routing app subnets through the Internet Gateway with **strict Security Group firewalls** achieves the exact same security posture for free!
 
 ---
 

@@ -9,13 +9,14 @@ By building the database now, we guarantee that the database endpoint exists **b
 ## ❓ Why Use Amazon RDS Instead of Postgres in a Container on EC2?
 
 In local development, running PostgreSQL inside a Docker container is convenient. But in enterprise cloud production:
+
 - If your EC2 instance crashes or auto-scales down, your database data is destroyed.
 - Manual backups, disk resizing, operating system patching, and failovers require constant operational overhead.
 
 ### 🌟 Why Amazon RDS is the Production Standard:
 
 ```
-          RAW POSTGRES ON EC2 ❌                     AMAZON RDS POSTGRESQL  
+          RAW POSTGRES ON EC2 ❌                     AMAZON RDS POSTGRESQL
 ┌────────────────────────────────────────┐ ┌────────────────────────────────────────┐
 │ • Manual backup cron jobs required     │ │ • Automated daily snapshots & point-in-│
 │ • Single point of failure              │ │   time recovery (up to 35 days)        │
@@ -30,7 +31,7 @@ In local development, running PostgreSQL inside a Docker container is convenient
 ## 🧩 What is an RDS DB Subnet Group?
 
 Amazon RDS requires a **DB Subnet Group**.  
-A DB Subnet Group instructs RDS: *"Place this database across these private subnets in at least two Availability Zones."*
+A DB Subnet Group instructs RDS: _"Place this database across these private subnets in at least two Availability Zones."_
 
 ```
                  DB Subnet Group: production-db-subnet-group
@@ -76,11 +77,11 @@ Availability Zone A (us-east-1a)              Availability Zone B (us-east-1b)
    - Engine type: **PostgreSQL** 🐘
    - Version: Select latest recommended (e.g. `PostgreSQL 16.x`).
 4. **Templates**:
-   - Select **Free tier** 🟢 *(Ensures zero unexpected costs!)*.
+   - Select **Free tier** 🟢 _(Ensures zero unexpected costs!)_.
 5. **Settings**:
    - **DB instance identifier**: `production-postgres`
    - **Master username**: `postgres`
-   - **Master password**: Enter a strong password (e.g. `DevOpsMaster2026!`) and confirm it. *(Remember this password for Step 4!)*
+   - **Master password**: Enter a strong password (e.g. `DevOpsMaster2026!`) and confirm it. _(Remember this password for Step 4!)_
 6. **Instance configuration**:
    - DB instance class: Select **Burstable classes** $\rightarrow$ `db.t3.micro` or `db.t4g.micro` (Free-tier eligible).
 7. **Storage**:
@@ -89,28 +90,30 @@ Availability Zone A (us-east-1a)              Availability Zone B (us-east-1b)
 8. **Connectivity**:
    - **Virtual private cloud (VPC)**: Select `production-vpc`.
    - **DB Subnet group**: Select `production-db-subnet-group`.
-   - **Public access**: Select **No** 🔒 *(Strictly private; isolated from the public internet!)*.
+   - **Public access**: Select **No** 🔒 _(Strictly private; isolated from the public internet!)_.
    - **VPC security group (firewall)**:
      - Choose **Select existing**.
      - Remove the default SG and select: `production-rds-db-sg` 🛡️.
 9. **Database authentication**: Select **Password authentication**.
 10. **Additional configuration** (Expand):
-    - **Initial database name**: `devops_db` *(Very important: Our backend connects to devops_db!)*.
+    - **Initial database name**: `devops_db` _(Very important: Our backend connects to devops_db!)_.
     - Automated backups: Enabled (Default 7 days).
 11. Scroll to the bottom and click **Create database**! 🎉
 
 > [!NOTE]
-> Amazon RDS takes about 5 to 10 minutes to allocate hardware, initialize PostgreSQL, and create the storage volumes. You can grab a coffee while it transitions from *Creating* to *Available*! ☕
+> Amazon RDS takes about 5 to 10 minutes to allocate hardware, initialize PostgreSQL, and create the storage volumes. You can grab a coffee while it transitions from _Creating_ to _Available_! ☕
 
 ---
 
 ## 🔍 Checkpoints: How to Verify & Copy Your Database Endpoint
 
 ### 1. Confirm RDS Status is Available
+
 - In the RDS Console, click **Databases**.
 - Wait until the **Status** column for `production-postgres` turns green: **Available** 🟢.
 
 ### 2. Copy the Database Endpoint
+
 - Click on `production-postgres`.
 - Under the **Connectivity & security** tab, find **Endpoint**:
   ```text
@@ -123,16 +126,12 @@ Availability Zone A (us-east-1a)              Availability Zone B (us-east-1b)
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: DB Subnet Group Configured Across Private Subnets
-<!-- Save your screenshot here as proof of work -->
-![DB Subnet Group](./screenshots/07-rds-db-subnet-group.png)
-*Caption: production-db-subnet-group spanning private-db-subnet-1a and 1b.*
+
+![DB Subnet Group Configured Across Private Subnets](image.png)
 
 ### 🖼️ Screenshot 2: Amazon RDS PostgreSQL Instance Available
-<!-- Save your screenshot here as proof of work -->
-![RDS PostgreSQL Available](./screenshots/08-rds-postgres-available.png)
-*Caption: production-postgres showing status Available and endpoint in production-vpc.*
 
----
+![Amazon RDS PostgreSQL Instance Available](image-1.png)
 
 ## ⏭️ Ready for Step 4?
 
