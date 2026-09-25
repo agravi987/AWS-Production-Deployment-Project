@@ -56,7 +56,14 @@ A Launch Template is the master blueprint that defines the AMI, instance size, I
    - **Security groups**: Select `production-ec2-app-sg` 🛡️.
 8. **Advanced details** (Expand this section at the bottom):
    - **IAM instance profile**: Select `production-ec2-secrets-role` *(Created in Step 4!)* 🔑.
-   - Scroll down to the **User data** box and paste the script below:
+   - Scroll down to the **User data** box.
+
+> [!TIP]
+> ### 📋 What Values Do I Need to Customize vs What is Automated?
+> - **EC2 IP Addresses (`10.0.12.x`, etc.)**: **DO NOT hardcode any IP address!** EC2 instances in Auto Scaling get random private IPs assigned automatically. Traffic reaches them through the Application Load Balancer, and the ASG registers their IPs dynamically into the Target Group!
+> - **Docker Username**: Pre-configured to **`ravi0706`**!
+> - **Option A (Zero-Touch with Secrets Manager - Recommended)**: If you created the secret `production/database/credentials` in Step 4 and attached the IAM role, **YOU DO NOT NEED TO EDIT ANYTHING IN THIS SCRIPT!** It automatically detects the region, fetches your database endpoint and password, and writes `.env`!
+> - **Option B (Manual Fallback without Secrets Manager)**: If you did not create the secret in Step 4, simply edit line 37 (`DB_HOST="YOUR-RDS-ENDPOINT..."`) and line 40 (`DB_PASSWORD="YourPassword..."`) before pasting.
 
 ```bash
 #!/bin/bash
@@ -87,7 +94,7 @@ APP_DIR="/home/ubuntu/app"
 mkdir -p "$APP_DIR"
 cd "$APP_DIR"
 
-# 4. Resolve AWS Region
+# 4. Resolve AWS Region dynamically
 IMDS_TOKEN=$(curl -s -S -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" || true)
 if [ -n "$IMDS_TOKEN" ]; then
   AWS_REGION=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" http://169.254.169.254/latest/meta-data/placement/region || echo "us-east-1")
@@ -99,7 +106,8 @@ fi
 SECRET_NAME="production/database/credentials"
 echo "🔐 Fetching database secret [$SECRET_NAME] from AWS Secrets Manager..."
 
-DB_HOST="localhost"
+# Manual fallback values (Only used if Secrets Manager is not configured):
+DB_HOST="YOUR-RDS-ENDPOINT.rds.amazonaws.com"
 DB_PORT="5432"
 DB_USER="postgres"
 DB_PASSWORD="yoursecurepassword123"

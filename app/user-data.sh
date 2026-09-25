@@ -58,11 +58,21 @@ fi
 echo "📍 AWS Region detected: $AWS_REGION"
 
 # 5. Retrieve Database Credentials from AWS Secrets Manager
+# ==============================================================================
+# 💡 WHAT TO CONFIGURE HERE:
+# ------------------------------------------------------------------------------
+# • OPTION A (RECOMMENDED - 100% AUTOMATED):
+#   If you created the secret in Step 4 and attached 'production-ec2-secrets-role',
+#   DO NOT CHANGE ANYTHING! The script automatically fetches DB_HOST and DB_PASSWORD.
+#
+# • OPTION B (MANUAL OVERRIDE - NO SECRETS MANAGER):
+#   If you do NOT want to use Secrets Manager, simply edit DB_HOST and DB_PASSWORD below:
+# ==============================================================================
 SECRET_NAME="production/database/credentials"
 echo "🔐 Fetching database secret [$SECRET_NAME] from AWS Secrets Manager..."
 
-# Default fallback values (will be overwritten if Secrets Manager succeeds)
-DB_HOST="localhost"
+# Manual fallback values (Replace these if NOT using AWS Secrets Manager):
+DB_HOST="YOUR-RDS-ENDPOINT.rds.amazonaws.com"
 DB_PORT="5432"
 DB_USER="postgres"
 DB_PASSWORD="yoursecurepassword123"
