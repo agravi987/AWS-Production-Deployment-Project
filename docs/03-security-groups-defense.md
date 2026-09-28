@@ -1,4 +1,4 @@
-# 🛡️ Step 2: Layered Security Groups (Zero-Trust Defense)
+# 🛡️ Step 3: Layered Security Groups (Zero-Trust Defense)
 
 🎯 **Mission**: Build a 3-tier firewall defense chain where the Load Balancer is public, but EC2 instances and the database only accept internal traffic from each other.
 
@@ -102,7 +102,7 @@ THE INTERNET (0.0.0.0/0)
 
 ---
 
-## ⏭️ Ready for Step 3?
+## ⏭️ Ready for Step 4?
 
 Now let's provision our managed database on Amazon RDS:  
-👉 **[Go to Step 3: 03-rds-database-mastery.md](./03-rds-database-mastery.md)**
+👉 **[Go to Step 4: 04-rds-database-mastery.md](./04-rds-database-mastery.md)**

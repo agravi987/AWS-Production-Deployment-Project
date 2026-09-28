@@ -1,4 +1,4 @@
-# 🔐 Step 4: AWS Secrets Manager & S3 Storage
+# 🔐 Step 5: AWS Secrets Manager & S3 Storage
 
 🎯 **Mission**: Store your database credentials in **AWS Secrets Manager** and create an **IAM Role** so your EC2 application servers can fetch them at boot time with zero hardcoded passwords.
 
@@ -31,7 +31,7 @@ With **AWS Secrets Manager + IAM Roles**:
 2. Click **Store a new secret**.
 3. Choose **Credentials for Amazon RDS database** 🐘:
    - User name: `postgres`
-   - Password: Enter your master RDS password from Step 3.
+   - Password: Enter your master RDS password from Step 4.
    - Encryption key: `aws/secretsmanager` (Default).
    - Database: Select `production-postgres`.
 4. Click **Next**.
@@ -85,7 +85,7 @@ With **AWS Secrets Manager + IAM Roles**:
 
 ---
 
-## ⏭️ Ready for Step 5?
+## ⏭️ Ready for Step 6?
 
 Now let's configure your Application Load Balancer and health checks:  
-👉 **[Go to Step 5: 05-application-load-balancer.md](./05-application-load-balancer.md)**
+👉 **[Go to Step 6: 06-application-load-balancer.md](./06-application-load-balancer.md)**

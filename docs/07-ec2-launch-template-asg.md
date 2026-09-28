@@ -1,4 +1,4 @@
-# 📈 Step 6: EC2 Launch Templates & Auto Scaling Groups (ASG)
+# 📈 Step 7: EC2 Launch Templates & Auto Scaling Groups (ASG)
 
 🎯 **Mission**: Create an **EC2 Launch Template** with automated Secrets Manager bootstrap, and launch an **Auto Scaling Group** that runs your full-stack Docker containers across 2 Availability Zones.
 
@@ -17,7 +17,7 @@
 > [!TIP]
 > - **EC2 IP Addresses**: **NEVER hardcode any IP address.** Auto Scaling assigns private IPs dynamically.
 > - **Docker Images**: Configured to use Docker Hub user **`ravi0706`** (`ravi0706/devops-client` and `ravi0706/devops-server`).
-> - **Zero-Touch Script**: Because you configured **AWS Secrets Manager** in Step 4 and attach the IAM Role here, **you do NOT need to edit the script below!** It fetches your database endpoint and password automatically!
+> - **Zero-Touch Script**: Because you configured **AWS Secrets Manager** in Step 5 and attach the IAM Role here, **you do NOT need to edit the script below!** It fetches your database endpoint and password automatically!
 
 ---
 
@@ -238,7 +238,7 @@ If `/var/log/user-data.log` reports `connect (101: Network is unreachable)`:
 
 ---
 
-## ⏭️ Ready for Step 7?
+## ⏭️ Ready for Step 8?
 
 Now let's configure your custom domain name with Route 53 and enable free HTTPS:  
-👉 **[Go to Step 7: 07-route53-and-https.md](./07-route53-and-https.md)**
+👉 **[Go to Step 8: 08-route53-and-https.md](./08-route53-and-https.md)**

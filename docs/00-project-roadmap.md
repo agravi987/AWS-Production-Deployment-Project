@@ -48,22 +48,23 @@ This project teaches you how to design, secure, and deploy a **real-world, multi
 
 ---
 
-## 🔢 The 10-Step Sequential Curriculum
+## 🔢 The 11-Step Sequential Curriculum
 
 Follow these guides in numerical order so every component is ready when the next one needs it:
 
 | Step | Guide | What You Will Build | Key Goal |
 | :---: | :--- | :--- | :--- |
-| **01** | **[01-vpc-and-networking.md](./01-vpc-and-networking.md)** | Custom VPC (`10.0.0.0/16`), 6 Subnets across 2 AZs, IGW & Routes | Network foundation |
-| **02** | **[02-security-groups-defense.md](./02-security-groups-defense.md)** | 3 Chained Security Groups (`alb-sg` $\rightarrow$ `ec2-app-sg` $\rightarrow$ `rds-db-sg`) | Zero-trust firewall rules |
-| **03** | **[03-rds-database-mastery.md](./03-rds-database-mastery.md)** | DB Subnet Group & Amazon RDS PostgreSQL | Database endpoint created |
-| **04** | **[04-s3-and-secrets-manager.md](./04-s3-and-secrets-manager.md)** | AWS Secrets Manager (`production/database/credentials`) + IAM Role | Safe credential storage |
-| **05** | **[05-application-load-balancer.md](./05-application-load-balancer.md)** | Target Group (`/api/health`) & Application Load Balancer | Traffic director ready |
-| **06** | **[06-ec2-launch-template-asg.md](./06-ec2-launch-template-asg.md)** | EC2 Launch Template with dynamic bootstrap + Auto Scaling Group | Auto-healing compute fleet |
-| **07** | **[07-route53-and-https.md](./07-route53-and-https.md)** | Route 53 Custom Domain + Free ACM SSL/TLS Certificate | Secure HTTPS & domain |
-| **08** | **[08-cloudwatch-monitoring.md](./08-cloudwatch-monitoring.md)** | CloudWatch CPU Alarms (>70%), SNS Email Alerts & Dashboard | Live observability |
-| **09** | **[09-cost-management-cleanup.md](./09-cost-management-cleanup.md)** | \$1.00 Budget Alarm & Reverse-Order Teardown Checklist | 100% Free Tier protection |
-| **10** | **[10-interview-masterclass.md](./10-interview-masterclass.md)** | 10 Technical Interview Questions, Elevator Pitch & Resume Bullets | Portfolio & interview ready |
+| **01** | **[01-docker-hub-images.md](./01-docker-hub-images.md)** | Full-stack Docker containers (React client + Node.js backend), local testing & Docker Hub push (`ravi0706`) | Container artifacts ready |
+| **02** | **[02-vpc-and-networking.md](./02-vpc-and-networking.md)** | Custom VPC (`10.0.0.0/16`), 6 Subnets across 2 AZs, IGW & Routes | Network foundation |
+| **03** | **[03-security-groups-defense.md](./03-security-groups-defense.md)** | 3 Chained Security Groups (`alb-sg` $\rightarrow$ `ec2-app-sg` $\rightarrow$ `rds-db-sg`) | Zero-trust firewall rules |
+| **04** | **[04-rds-database-mastery.md](./04-rds-database-mastery.md)** | DB Subnet Group & Amazon RDS PostgreSQL | Database endpoint created |
+| **05** | **[05-s3-and-secrets-manager.md](./05-s3-and-secrets-manager.md)** | AWS Secrets Manager (`production/database/credentials`) + IAM Role | Safe credential storage |
+| **06** | **[06-application-load-balancer.md](./06-application-load-balancer.md)** | Target Group (`/api/health`) & Application Load Balancer | Traffic director ready |
+| **07** | **[07-ec2-launch-template-asg.md](./07-ec2-launch-template-asg.md)** | EC2 Launch Template with dynamic bootstrap + Auto Scaling Group | Auto-healing compute fleet |
+| **08** | **[08-route53-and-https.md](./08-route53-and-https.md)** | Route 53 Custom Domain + Free ACM SSL/TLS Certificate | Secure HTTPS & domain |
+| **09** | **[09-cloudwatch-monitoring.md](./09-cloudwatch-monitoring.md)** | CloudWatch CPU Alarms (>70%), SNS Email Alerts & Dashboard | Live observability |
+| **10** | **[10-cost-management-cleanup.md](./10-cost-management-cleanup.md)** | \$1.00 Budget Alarm & Reverse-Order Teardown Checklist | 100% Free Tier protection |
+| **11** | **[11-interview-masterclass.md](./11-interview-masterclass.md)** | 10 Technical Interview Questions, Elevator Pitch & Resume Bullets | Portfolio & interview ready |
 
 ---
 
@@ -71,9 +72,9 @@ Follow these guides in numerical order so every component is ready when the next
 
 | Setting | Value to Use | Note |
 | :--- | :--- | :--- |
+| **Docker Username** | `ravi0706` | Images: `ravi0706/devops-client` & `devops-server` |
 | **AWS Region** | `us-east-1` (N. Virginia) | Keep all services in the same region |
 | **VPC CIDR** | `10.0.0.0/16` | Pre-configured in docs |
-| **Docker Username** | `ravi0706` | Images: `ravi0706/devops-client` & `devops-server` |
 | **Database Name** | `devops_db` | Used by application backend |
 | **Database User** | `postgres` | Default PostgreSQL master user |
 | **Secret Name** | `production/database/credentials` | Used by `user-data.sh` to auto-fetch DB credentials |
@@ -83,5 +84,5 @@ Follow these guides in numerical order so every component is ready when the next
 
 ## 🚀 Ready to Begin?
 
-Start with your custom network foundation:  
-👉 **[Start Step 1: 01-vpc-and-networking.md](./01-vpc-and-networking.md)**
+Start by building your Docker containers and pushing them to Docker Hub:  
+👉 **[Start Step 1: 01-docker-hub-images.md](./01-docker-hub-images.md)**

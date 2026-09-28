@@ -1,4 +1,4 @@
-# 📊 Step 8: Amazon CloudWatch Monitoring & Alerts
+# 📊 Step 9: Amazon CloudWatch Monitoring & Alerts
 
 🎯 **Mission**: Set up automated **SNS email alerts** and build a **CloudWatch CPU Alarm** that notifies you when your Auto Scaling Group experiences high traffic or CPU spikes.
 
@@ -81,7 +81,7 @@ Want to see your alarm trigger with a real spike?
 
 ---
 
-## ⏭️ Ready for Step 9?
+## ⏭️ Ready for Step 10?
 
 Now let's set up cost monitoring and review the safe reverse-order teardown guide:  
-👉 **[Go to Step 9: 09-cost-management-cleanup.md](./09-cost-management-cleanup.md)**
+👉 **[Go to Step 10: 10-cost-management-cleanup.md](./10-cost-management-cleanup.md)**

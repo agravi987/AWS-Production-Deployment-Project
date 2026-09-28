@@ -11,8 +11,10 @@
 Thumbs.db
 desktop.ini
 
-# Node modules
+# Node modules & build artifacts
 node_modules/
+dist/
+build/
 package-lock.json
 
 # IDE Files

@@ -1,4 +1,4 @@
-# 🐘 Step 3: Amazon RDS PostgreSQL (Database Mastery)
+# 🐘 Step 4: Amazon RDS PostgreSQL (Database Mastery)
 
 🎯 **Mission**: Launch a managed **Amazon RDS PostgreSQL** database in private database subnets and copy the generated database endpoint.
 
@@ -76,7 +76,7 @@ In production, running a database inside a temporary EC2 container is dangerous�
    ```text
    production-postgres.c123456789.us-east-1.rds.amazonaws.com
    ```
-4. 📋 **Copy this endpoint string!** You will store it in AWS Secrets Manager in Step 4.
+4. 📋 **Copy this endpoint string!** You will store it in AWS Secrets Manager in Step 5.
 
 ---
 
@@ -92,7 +92,7 @@ In production, running a database inside a temporary EC2 container is dangerous�
 
 ---
 
-## ⏭️ Ready for Step 4?
+## ⏭️ Ready for Step 5?
 
 Now let's store your RDS endpoint and password securely in AWS Secrets Manager:  
-👉 **[Go to Step 4: 04-s3-and-secrets-manager.md](./04-s3-and-secrets-manager.md)**
+👉 **[Go to Step 5: 05-s3-and-secrets-manager.md](./05-s3-and-secrets-manager.md)**

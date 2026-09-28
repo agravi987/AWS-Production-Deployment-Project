@@ -1,0 +1,65 @@
+# ==============================================================================
+# Local Development Docker Compose
+# Use this file to test the full-stack application on your local machine
+# Usage: docker compose -f docker-compose.local.yml up --build -d
+# ==============================================================================
+
+services:
+  # 1. Local PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: local_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: devops_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - local_network
+
+  # 2. Express Backend API
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: local_backend
+    restart: always
+    environment:
+      PORT: 5000
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: password123
+      DB_NAME: devops_db
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    networks:
+      - local_network
+
+  # 3. React Frontend (Nginx Reverse Proxy)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: local_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - local_network
+
+networks:
+  local_network:
+    driver: bridge
+
+volumes:
+  pgdata:

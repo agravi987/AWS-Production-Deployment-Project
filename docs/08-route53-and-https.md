@@ -1,4 +1,4 @@
-# 🌍 Step 7: Amazon Route 53 & HTTPS (SSL/TLS Encryption)
+# 🌍 Step 8: Amazon Route 53 & HTTPS (SSL/TLS Encryption)
 
 🎯 **Mission**: Connect a custom domain name using **Amazon Route 53** and attach a free, auto-renewing **SSL/TLS certificate** from **AWS Certificate Manager (ACM)** to secure your site with HTTPS!
 
@@ -98,7 +98,7 @@
 
 ---
 
-## ⏭️ Ready for Step 8?
+## ⏭️ Ready for Step 9?
 
 Now let's configure observability, CloudWatch alarms, and automated SNS email alerts:  
-👉 **[Go to Step 8: 08-cloudwatch-monitoring.md](./08-cloudwatch-monitoring.md)**
+👉 **[Go to Step 9: 09-cloudwatch-monitoring.md](./09-cloudwatch-monitoring.md)**

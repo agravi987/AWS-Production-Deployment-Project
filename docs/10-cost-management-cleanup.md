@@ -1,4 +1,4 @@
-# 💰 Step 9: AWS Cost Management & Safe Teardown Checklist
+# 💰 Step 10: AWS Cost Management & Safe Teardown Checklist
 
 🎯 **Mission**: Create a **$1.00 AWS Budget alert** to stay 100% Free Tier, and master the **exact reverse-order teardown sequence** when you want to safely delete or pause your lab resources.
 
@@ -61,7 +61,7 @@ TEARDOWN:       ASG / EC2 ➔ ALB ➔ Secrets ➔ RDS ➔ SGs ➔ VPC
 
 ---
 
-## ⏭️ Ready for Step 10?
+## ⏭️ Ready for Step 11?
 
 Now let's practice the top DevOps & Cloud Architecture interview questions and prepare your resume bullet points:  
-👉 **[Go to Step 10: 10-interview-masterclass.md](./10-interview-masterclass.md)**
+👉 **[Go to Step 11: 11-interview-masterclass.md](./11-interview-masterclass.md)**

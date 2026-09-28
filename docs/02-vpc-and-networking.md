@@ -1,4 +1,4 @@
-# 🌐 Step 1: Virtual Private Cloud (VPC) & Multi-AZ Networking
+# 🌐 Step 2: Virtual Private Cloud (VPC) & Multi-AZ Networking
 
 🎯 **Mission**: Build an isolated custom cloud network spanning **2 Availability Zones** with dedicated public, application, and database subnets.
 
@@ -129,7 +129,7 @@ Click **Create subnet**.
 
 ---
 
-## ⏭️ Ready for Step 2?
+## ⏭️ Ready for Step 3?
 
 Now let's configure your 3-tier firewall defense with Security Groups:  
-👉 **[Go to Step 2: 02-security-groups-defense.md](./02-security-groups-defense.md)**
+👉 **[Go to Step 3: 03-security-groups-defense.md](./03-security-groups-defense.md)**

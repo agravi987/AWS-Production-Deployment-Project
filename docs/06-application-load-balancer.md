@@ -1,4 +1,4 @@
-# ⚖️ Step 5: Application Load Balancer (ALB) Mastery
+# ⚖️ Step 6: Application Load Balancer (ALB) Mastery
 
 🎯 **Mission**: Create a **Target Group** that checks application health on `/api/health`, and launch an **Application Load Balancer (ALB)** across public subnets to distribute incoming user traffic.
 
@@ -42,7 +42,7 @@ Instead of giving users individual EC2 IP addresses that change constantly, an A
 3. Health checks:
    - Health check path: `/api/health` *(Our backend health check endpoint)*.
 4. Click **Next** $\rightarrow$ Click **Create target group**! 🎉  
-   *(Do not manually register instances now; Auto Scaling does this automatically in Step 6)*.
+   *(Do not manually register instances now; Auto Scaling does this automatically in Step 7)*.
 
 ---
 
@@ -84,7 +84,7 @@ Instead of giving users individual EC2 IP addresses that change constantly, an A
 
 ---
 
-## ⏭️ Ready for Step 6?
+## ⏭️ Ready for Step 7?
 
 Now let's launch the Auto Scaling Group that deploys our Docker compute fleet to this Target Group:  
-👉 **[Go to Step 6: 06-ec2-launch-template-asg.md](./06-ec2-launch-template-asg.md)**
+👉 **[Go to Step 7: 07-ec2-launch-template-asg.md](./07-ec2-launch-template-asg.md)**
