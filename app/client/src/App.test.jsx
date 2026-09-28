@@ -10,17 +10,17 @@ global.fetch = vi.fn(() =>
   })
 );
 
-describe('React App Component', () => {
-  it('renders the main heading correctly', () => {
+describe('AWS Full-Stack React Component', () => {
+  it('renders the AWS Production Cloud Architecture heading correctly', () => {
     render(<App />);
-    const headingElement = screen.getByText(/DevOps CI\/CD Pipeline Project/i);
+    const headingElement = screen.getByText(/AWS Production Cloud Architecture/i);
     expect(headingElement).toBeInTheDocument();
   });
 
-  it('renders the architecture badges', () => {
+  it('renders the AWS cloud service badges', () => {
     render(<App />);
-    expect(screen.getByText(/React \(Frontend\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Express \(Backend\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/PostgreSQL \(Database\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Application Load Balancer/i)).toBeInTheDocument();
+    expect(screen.getByText(/EC2 Auto Scaling/i)).toBeInTheDocument();
+    expect(screen.getByText(/Amazon RDS PostgreSQL/i)).toBeInTheDocument();
   });
 });

@@ -42,12 +42,13 @@ const initDB = async () => {
     if (parseInt(countRes.rows[0].count, 10) === 0) {
       await pool.query(`
         INSERT INTO tasks (title, description, completed) VALUES
-        ('Learn CI/CD Fundamentals', 'Understand the difference between Continuous Integration and Continuous Deployment.', true),
-        ('Build Docker Containers', 'Create Dockerfile for React and Express and test with Docker Compose.', true),
-        ('Set up GitHub Actions Pipeline', 'Automate testing, container building, and pushing to Docker Hub.', true),
-        ('Deploy to AWS EC2', 'Successfully deployed and running on AWS EC2!', true);
+        ('Deploy Custom VPC & Multi-AZ Subnets', 'Configured 6 subnets across us-east-1a and us-east-1b with Internet Gateway.', true),
+        ('Configure Chained Security Groups', 'Zero-trust network defense: production-alb-sg -> production-ec2-app-sg -> production-rds-db-sg.', true),
+        ('Launch Amazon RDS PostgreSQL Multi-AZ', 'Managed relational database placed in private subnets with automated backups.', true),
+        ('Store Secrets in AWS Secrets Manager', 'Secured DB credentials (production/database/credentials) and attached IAM EC2 Role.', true),
+        ('Deploy Application Load Balancer & ASG', 'Self-healing compute fleet with automated /api/health probes across 2 AZs.', true);
       `);
-      console.log("✅ Default tasks seeded successfully");
+      console.log("✅ AWS Production tasks seeded successfully");
     }
     console.log("✅ Database schema verified");
   } catch (err) {

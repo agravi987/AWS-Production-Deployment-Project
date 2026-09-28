@@ -20,7 +20,7 @@ describe(' Devops API Endpoints Test Suite', () => {
     const res = await request(app).get('/');
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('message');
-    expect(res.body.message).toContain('DevOps CI/CD Demo API is running');
+    expect(res.body.message).toContain('AWS Production Deployment Multi-Tier Cloud API is running');
   });
 
   // 2. Health Check Endpoint Test (Healthy Case)

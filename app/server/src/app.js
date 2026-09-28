@@ -16,7 +16,7 @@ app.use(express.json());
 // -------------------------------------------------------------
 app.get('/', (req, res) => {
   res.json({
-    message: 'DevOps CI/CD Demo API is running!',
+    message: 'AWS Production Deployment Multi-Tier Cloud API is running!',
     version: '1.0.0',
     documentation: '/api/health or /api/tasks'
   });

@@ -9,7 +9,7 @@ function App() {
   const [newDesc, setNewDesc] = useState('');
   const [actionError, setActionError] = useState('');
 
-  // 1. Fetch Backend & Database Health
+  // 1. Fetch Backend & RDS Database Health Check
   const checkHealth = async () => {
     setHealthLoading(true);
     try {
@@ -27,7 +27,7 @@ function App() {
     }
   };
 
-  // 2. Fetch Tasks from Postgres Database via Express API
+  // 2. Fetch Tasks from Amazon RDS via Express API
   const fetchTasks = async () => {
     setTasksLoading(true);
     try {
@@ -37,8 +37,8 @@ function App() {
         setTasks(result.data);
       }
     } catch (err) {
-      console.error('Failed to load tasks:', err);
-      setActionError('Could not load tasks from database.');
+      console.error('Failed to load tasks from RDS:', err);
+      setActionError('Could not load records from PostgreSQL database.');
     } finally {
       setTasksLoading(false);
     }
@@ -49,7 +49,7 @@ function App() {
     fetchTasks();
   }, []);
 
-  // 3. Create a new task
+  // 3. Create a new task in Amazon RDS PostgreSQL
   const handleCreateTask = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -67,14 +67,14 @@ function App() {
         setNewDesc('');
         setActionError('');
       } else {
-        setActionError(result.error || 'Failed to create task');
+        setActionError(result.error || 'Failed to create record in RDS');
       }
     } catch (err) {
-      setActionError('Network error while creating task');
+      setActionError('Network error while persisting task to RDS database');
     }
   };
 
-  // 4. Toggle task completion status
+  // 4. Toggle task status in Amazon RDS PostgreSQL
   const handleToggleTask = async (task) => {
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
@@ -87,11 +87,11 @@ function App() {
         setTasks(tasks.map((t) => (t.id === task.id ? result.data : t)));
       }
     } catch (err) {
-      setActionError('Failed to update task');
+      setActionError('Failed to update task state in RDS');
     }
   };
 
-  // 5. Delete task
+  // 5. Delete task from Amazon RDS PostgreSQL
   const handleDeleteTask = async (id) => {
     try {
       const res = await fetch(`/api/tasks/${id}`, {
@@ -102,7 +102,7 @@ function App() {
         setTasks(tasks.filter((t) => t.id !== id));
       }
     } catch (err) {
-      setActionError('Failed to delete task');
+      setActionError('Failed to delete record from RDS');
     }
   };
 
@@ -111,145 +111,216 @@ function App() {
 
   return (
     <div className="container">
-      {/* Main Header */}
+      {/* AWS Cloud Architecture Header */}
       <header className="header">
-        <h1>🚀 DevOps CI/CD Pipeline Project</h1>
-        <p>Automated Delivery from Git Push to Docker Hub to AWS EC2</p>
+        <div className="aws-badge-top">AWS Well-Architected Framework</div>
+        <h1>☁️ AWS Production Cloud Architecture</h1>
+        <p>Enterprise Multi-Tier Deployment with ALB, EC2 Auto Scaling & Amazon RDS</p>
 
         <div className="badges-row">
-          <span className="badge">⚛️ React (Frontend)</span>
-          <span className="badge">🟢 Express (Backend)</span>
-          <span className="badge">🐘 PostgreSQL (Database)</span>
-          <span className="badge">🐳 Docker</span>
-          <span className="badge">☁️ AWS EC2</span>
-          <span className="badge">⚡ GitHub Actions</span>
+          <span className="badge">🌐 Route 53 (DNS)</span>
+          <span className="badge">🔒 ACM (SSL/TLS)</span>
+          <span className="badge">⚖️ Application Load Balancer</span>
+          <span className="badge">📈 EC2 Auto Scaling</span>
+          <span className="badge">🐘 Amazon RDS PostgreSQL</span>
+          <span className="badge">🔐 AWS Secrets Manager</span>
+          <span className="badge">📊 CloudWatch & SNS</span>
         </div>
       </header>
 
-      {/* CI/CD Pipeline Flow Visualizer */}
+      {/* 3-Tier Multi-AZ Cloud Architecture Visualizer */}
       <section className="card">
-        <h2>🔄 CI/CD Pipeline Automation Stages</h2>
-        <div className="pipeline-flow">
-          <div className="flow-step">
-            <span className="icon">💻</span>
-            <span className="title">1. Git Push</span>
+        <h2>
+          <span>🏗️ 3-Tier Multi-AZ Cloud Architecture</span>
+          <span className="badge region-badge">Region: us-east-1</span>
+        </h2>
+        
+        <div className="cloud-tiers-container">
+          {/* Tier 1: Web & Ingress */}
+          <div className="cloud-tier-card web-tier">
+            <div className="tier-header">
+              <span className="tier-icon">⚖️</span>
+              <div>
+                <div className="tier-name">Tier 1: Web & Routing</div>
+                <div className="tier-sub">Public Subnets (10.0.1.0/24 & 10.0.2.0/24)</div>
+              </div>
+            </div>
+            <ul className="tier-details">
+              <li><strong>Ingress:</strong> Internet (0.0.0.0/0 on Ports 80 & 443)</li>
+              <li><strong>Load Balancer:</strong> <code>production-alb</code> (Dual AZ)</li>
+              <li><strong>Security Group:</strong> <code>production-alb-sg</code></li>
+              <li><strong>Health Probes:</strong> <code>HTTP:80/api/health</code></li>
+            </ul>
           </div>
-          <span className="flow-arrow">→</span>
-          <div className="flow-step">
-            <span className="icon">🧪</span>
-            <span className="title">2. Lint & Tests</span>
+
+          <div className="tier-connector">➔</div>
+
+          {/* Tier 2: Compute */}
+          <div className="cloud-tier-card app-tier">
+            <div className="tier-header">
+              <span className="tier-icon">💻</span>
+              <div>
+                <div className="tier-name">Tier 2: Compute Fleet</div>
+                <div className="tier-sub">App Subnets (10.0.11.0/24 & 10.0.12.0/24)</div>
+              </div>
+            </div>
+            <ul className="tier-details">
+              <li><strong>Auto Scaling:</strong> <code>production-asg</code> (2-4 Nodes)</li>
+              <li><strong>Security Group:</strong> <code>production-ec2-app-sg</code></li>
+              <li><strong>Chained Defense:</strong> Traffic accepted ONLY from ALB</li>
+              <li><strong>IAM Profile:</strong> <code>production-ec2-secrets-role</code></li>
+            </ul>
           </div>
-          <span className="flow-arrow">→</span>
-          <div className="flow-step">
-            <span className="icon">🛡️</span>
-            <span className="title">3. Security Scan</span>
-          </div>
-          <span className="flow-arrow">→</span>
-          <div className="flow-step">
-            <span className="icon">📦</span>
-            <span className="title">4. Docker Hub</span>
-          </div>
-          <span className="flow-arrow">→</span>
-          <div className="flow-step">
-            <span className="icon">☁️</span>
-            <span className="title">5. Deploy to EC2</span>
-          </div>
-          <span className="flow-arrow">→</span>
-          <div className="flow-step">
-            <span className="icon">🩺</span>
-            <span className="title">6. Health Check</span>
+
+          <div className="tier-connector">➔</div>
+
+          {/* Tier 3: Data */}
+          <div className="cloud-tier-card db-tier">
+            <div className="tier-header">
+              <span className="tier-icon">🐘</span>
+              <div>
+                <div className="tier-name">Tier 3: Database Storage</div>
+                <div className="tier-sub">Private DB Subnets (10.0.21.0/24 & 10.0.22.0/24)</div>
+              </div>
+            </div>
+            <ul className="tier-details">
+              <li><strong>Database:</strong> Amazon RDS PostgreSQL 16</li>
+              <li><strong>Subnet Group:</strong> <code>production-db-subnet-group</code></li>
+              <li><strong>Security Group:</strong> <code>production-rds-db-sg</code></li>
+              <li><strong>Public Ingress:</strong> Strict NO 🔒 (Zero internet access)</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* Live System Health Monitor */}
+      {/* Live AWS Production Telemetry & Health Checks */}
       <section className="card">
         <h2>
-          <span>🩺 Live Health & System Status</span>
+          <span>🩺 Live Multi-Tier Telemetry & Health Checks</span>
           <button
             onClick={checkHealth}
-            className="btn"
-            style={{ marginLeft: 'auto', padding: '4px 10px', fontSize: '0.8rem', background: '#334155', color: '#fff' }}
+            className="btn btn-refresh"
           >
-            Refresh
+            🔄 Refresh Health
           </button>
         </h2>
 
         <div className="grid-cols-3">
+          {/* Web Tier Status */}
           <div className="metric-box">
-            <div className="label">Backend API Status</div>
+            <div className="label">Web Tier / ALB Route</div>
             <div className="value">
               {healthLoading ? (
-                'Checking...'
+                'Probing /api/health...'
               ) : isBackendUp ? (
-                <span className="badge success">● ONLINE (UP)</span>
+                <span className="badge success">● HEALTHY (200 OK)</span>
               ) : (
-                <span className="badge danger">● OFFLINE (DOWN)</span>
+                <span className="badge danger">● UNHEALTHY</span>
               )}
+            </div>
+            <div className="metric-sub">
+              Target Group: <code>production-tg</code>
             </div>
           </div>
 
+          {/* App Tier Status */}
           <div className="metric-box">
-            <div className="label">PostgreSQL Database</div>
+            <div className="label">App Tier / EC2 Fleet</div>
             <div className="value">
               {healthLoading ? (
-                'Checking...'
+                'Checking Node.js...'
+              ) : isBackendUp ? (
+                <span className="badge success">● ONLINE (UP)</span>
+              ) : (
+                <span className="badge danger">● DOWN</span>
+              )}
+            </div>
+            <div className="metric-sub">
+              Env: <strong>{health?.environment || 'production'}</strong> | Uptime: <strong>{health?.uptimeSeconds !== undefined ? `${health.uptimeSeconds}s` : 'N/A'}</strong>
+            </div>
+          </div>
+
+          {/* Database Tier Status */}
+          <div className="metric-box">
+            <div className="label">Database Tier / RDS PostgreSQL</div>
+            <div className="value">
+              {healthLoading ? (
+                'Testing Query...'
               ) : isDbConnected ? (
                 <span className="badge success">● CONNECTED</span>
               ) : (
                 <span className="badge danger">● DISCONNECTED</span>
               )}
             </div>
-          </div>
-
-          <div className="metric-box">
-            <div className="label">Environment & Uptime</div>
-            <div className="value" style={{ fontSize: '0.9rem' }}>
-              Env: <strong>{health?.environment || 'N/A'}</strong> <br />
-              Uptime: <strong>{health?.uptimeSeconds !== undefined ? `${health.uptimeSeconds}s` : 'N/A'}</strong>
+            <div className="metric-sub">
+              Auth: <strong>AWS Secrets Manager</strong>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Interactive Task Management (Validating Database Persistence) */}
+      {/* Infrastructure Specs Bar */}
+      <div className="cloud-specs-bar">
+        <div className="spec-item">
+          <span className="spec-label">VPC CIDR:</span>
+          <span className="spec-value">10.0.0.0/16</span>
+        </div>
+        <div className="spec-item">
+          <span className="spec-label">Availability Zones:</span>
+          <span className="spec-value">us-east-1a & us-east-1b</span>
+        </div>
+        <div className="spec-item">
+          <span className="spec-label">Security:</span>
+          <span className="spec-value">Chained Zero-Trust</span>
+        </div>
+        <div className="spec-item">
+          <span className="spec-label">Secrets Vault:</span>
+          <span className="spec-value">production/database/credentials</span>
+        </div>
+      </div>
+
+      {/* Amazon RDS PostgreSQL CRUD Validation */}
       <section className="card">
-        <h2>📋 PostgreSQL Database Tasks (CRUD Test)</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
-          This section proves your 3-tier architecture is communicating properly: React → Express API → PostgreSQL.
+        <h2>
+          <span>📋 Amazon RDS PostgreSQL Live Verification</span>
+          <span className="badge db-count-badge">{tasks.length} Records</span>
+        </h2>
+        <p className="section-desc">
+          Validates end-to-end data persistence across the full 3-tier AWS stack: 
+          <strong> Client Browser ➔ ALB ➔ EC2 (Docker) ➔ Amazon RDS (PostgreSQL)</strong>.
         </p>
 
         {actionError && (
-          <div style={{ color: '#f87171', background: 'rgba(239, 68, 68, 0.1)', padding: '8px 12px', borderRadius: '6px', marginBottom: '12px' }}>
+          <div className="alert-error">
             ⚠️ {actionError}
           </div>
         )}
 
-        {/* Form to Add Task */}
+        {/* Task Form */}
         <form onSubmit={handleCreateTask} className="task-form">
           <input
             type="text"
-            placeholder="Task title (e.g., Verify Docker images)"
+            placeholder="Deploy checklist item (e.g., Verify Multi-AZ failover)"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             required
           />
           <input
             type="text"
-            placeholder="Description (optional)"
+            placeholder="Architecture notes / verification criteria"
             value={newDesc}
             onChange={(e) => setNewDesc(e.target.value)}
           />
           <button type="submit" className="btn btn-primary">
-            + Add Task
+            + Persist to RDS
           </button>
         </form>
 
-        {/* Task Listing */}
+        {/* Tasks List */}
         {tasksLoading ? (
-          <p className="empty-state">Loading tasks from database...</p>
+          <p className="empty-state">Querying PostgreSQL database...</p>
         ) : tasks.length === 0 ? (
-          <p className="empty-state">No tasks found. Add your first task above!</p>
+          <p className="empty-state">No records found. Insert your first verification task above!</p>
         ) : (
           <div className="task-list">
             {tasks.map((task) => (
@@ -260,7 +331,7 @@ function App() {
                     className="task-checkbox"
                     checked={task.completed}
                     onChange={() => handleToggleTask(task)}
-                    title="Mark complete/incomplete"
+                    title="Mark verified / pending"
                   />
                   <div>
                     <div className={`task-title ${task.completed ? 'completed' : ''}`}>
@@ -272,7 +343,7 @@ function App() {
                 <button
                   onClick={() => handleDeleteTask(task.id)}
                   className="btn btn-delete"
-                  title="Delete task from database"
+                  title="Delete record from Amazon RDS"
                 >
                   Delete
                 </button>
