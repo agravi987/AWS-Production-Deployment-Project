@@ -8,6 +8,7 @@
 
 In production, running a database inside a temporary EC2 container is dangerous—if the server crashes, you can lose all user data.  
 **Amazon RDS** automatically handles:
+
 - Daily automated snapshots and backups
 - Storage auto-expansion
 - Automated security patching
@@ -17,25 +18,26 @@ In production, running a database inside a temporary EC2 container is dangerous�
 
 ## 📋 Copy-Paste Configuration Table
 
-| Setting | Value to Choose | Why |
-| :--- | :--- | :--- |
-| **Engine** | **PostgreSQL** | Industry standard relational database |
-| **Template** | **Free tier** 🟢 | Guarantees $0.00 cost |
-| **DB Identifier** | `production-postgres` | Name of your database instance |
-| **Master Username** | `postgres` | Default administrative user |
-| **Master Password** | *Choose your password* (e.g. `DevOpsMaster2026!`) | 🔑 **Remember this password!** |
-| **Instance Class** | `db.t3.micro` or `db.t4g.micro` | Free Tier eligible compute |
-| **VPC** | `production-vpc` | Placed inside your custom network |
-| **DB Subnet Group** | `production-db-subnet-group` | Placed across private DB subnets |
-| **Public Access** | **No** 🔒 | Strictly isolated from the internet |
-| **VPC Security Group** | `production-rds-db-sg` | Allows access only from EC2 app servers |
-| **Initial Database Name** | `devops_db` | ⚠️ **Must be `devops_db` for application backend** |
+| Setting                   | Value to Choose                                   | Why                                                |
+| :------------------------ | :------------------------------------------------ | :------------------------------------------------- |
+| **Engine**                | **PostgreSQL**                                    | Industry standard relational database              |
+| **Template**              | **Free tier** 🟢                                  | Guarantees $0.00 cost                              |
+| **DB Identifier**         | `production-postgres`                             | Name of your database instance                     |
+| **Master Username**       | `postgres`                                        | Default administrative user                        |
+| **Master Password**       | _Choose your password_ (e.g. `DevOpsMaster2026!`) | 🔑 **Remember this password!**                     |
+| **Instance Class**        | `db.t3.micro` or `db.t4g.micro`                   | Free Tier eligible compute                         |
+| **VPC**                   | `production-vpc`                                  | Placed inside your custom network                  |
+| **DB Subnet Group**       | `production-db-subnet-group`                      | Placed across private DB subnets                   |
+| **Public Access**         | **No** 🔒                                         | Strictly isolated from the internet                |
+| **VPC Security Group**    | `production-rds-db-sg`                            | Allows access only from EC2 app servers            |
+| **Initial Database Name** | `devops_db`                                       | ⚠️ **Must be `devops_db` for application backend** |
 
 ---
 
 ## 🖱️ Step-by-Step AWS Console Recipe
 
 ### 1. Create DB Subnet Group
+
 1. Open the [AWS RDS Console](https://console.aws.amazon.com/rds/) $\rightarrow$ click **Subnet groups**.
 2. Click **Create DB subnet group**:
    - **Name**: `production-db-subnet-group`
@@ -47,6 +49,7 @@ In production, running a database inside a temporary EC2 container is dangerous�
 ---
 
 ### 2. Create the PostgreSQL Database
+
 1. In the left RDS menu, click **Databases** $\rightarrow$ Click **Create database**.
 2. Method: **Standard create** | Engine: **PostgreSQL**.
 3. Templates: Select **Free tier** 🟢.
@@ -64,7 +67,7 @@ In production, running a database inside a temporary EC2 container is dangerous�
 8. Additional configuration (Expand at the bottom):
    - Initial database name: `devops_db`
 9. Click **Create database**! 🚀  
-   *(Takes 5 to 10 minutes to initialize and become Available).*
+   _(Takes 5 to 10 minutes to initialize and become Available)._
 
 ---
 
@@ -83,12 +86,12 @@ In production, running a database inside a temporary EC2 container is dangerous�
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: RDS DB Subnet Group
-<!-- Capture screenshot in RDS console under Subnet Groups -->
-`docs/screenshots/12-rds-db-subnet-group.png`
+
+![RDS DB Subnet Group](image.png)
 
 ### 🖼️ Screenshot 2: Amazon RDS Instance Available
-<!-- Capture screenshot in RDS console showing Available status and Endpoint -->
-`docs/screenshots/13-rds-postgres-available.png`
+
+![Amazon RDS Instance Available](image-1.png)
 
 ---
 

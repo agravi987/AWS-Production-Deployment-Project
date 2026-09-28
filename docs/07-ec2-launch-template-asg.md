@@ -15,6 +15,7 @@
 ## 📋 What You Need to Know Before Starting
 
 > [!TIP]
+>
 > - **EC2 IP Addresses**: **NEVER hardcode any IP address.** Auto Scaling assigns private IPs dynamically.
 > - **Docker Images**: Configured to use Docker Hub user **`ravi0706`** (`ravi0706/devops-client` and `ravi0706/devops-server`).
 > - **Zero-Touch Script**: Because you configured **AWS Secrets Manager** in Step 5 and attach the IAM Role here, **you do NOT need to edit the script below!** It fetches your database endpoint and password automatically!
@@ -24,6 +25,7 @@
 ## 🖱️ Step-by-Step AWS Console Recipe
 
 ### Part 1: Create Launch Template
+
 1. Open the [AWS EC2 Console](https://console.aws.amazon.com/ec2/) $\rightarrow$ click **Launch Templates** $\rightarrow$ Click **Create launch template**.
 2. **Details**:
    - Name: `production-lt`
@@ -32,9 +34,9 @@
 3. **OS Image**:
    - Select **Ubuntu** $\rightarrow$ choose **Ubuntu Server 22.04 LTS (HVM)** (Free Tier).
 4. **Instance type**: `t2.micro` (or `t3.micro`).
-5. **Key pair**: Select your key pair or choose *Proceed without a key pair*.
+5. **Key pair**: Select your key pair or choose _Proceed without a key pair_.
 6. **Network settings**:
-   - Subnet: *Don't include in launch template*.
+   - Subnet: _Don't include in launch template_.
    - Security groups: Select `production-ec2-app-sg` 🛡️.
 7. **Advanced details** (Expand at the bottom):
    - **IAM instance profile**: Select `production-ec2-secrets-role` 🔑.
@@ -166,11 +168,13 @@ sleep 10
 curl -s http://localhost/api/health || true
 echo "✅ EC2 Bootstrap Completed Successfully!"
 ```
+
 8. Click **Create launch template**! 🎉
 
 ---
 
 ### Part 2: Create Auto Scaling Group (ASG)
+
 1. In the EC2 left menu, click **Auto Scaling Groups** $\rightarrow$ Click **Create Auto Scaling group**.
 2. **Name**: `production-asg` | Launch template: `production-lt` $\rightarrow$ Click **Next**.
 3. **Network**:
@@ -199,7 +203,7 @@ echo "✅ EC2 Bootstrap Completed Successfully!"
      docker ps
      curl http://localhost/api/health
      ```
-   - *Expected output*: `{"status":"UP","database":"connected"}` 🎉
+   - _Expected output_: `{"status":"UP","database":"connected"}` 🎉
 3. **Check Target Group**:
    - Go to **Target Groups** $\rightarrow$ `production-tg` $\rightarrow$ Targets tab: Both instances show **Healthy** 🟢!
 4. **Open in Browser**:
@@ -220,6 +224,7 @@ echo "✅ EC2 Bootstrap Completed Successfully!"
 ## 🛠️ Troubleshooting: "101: Network is unreachable"
 
 If `/var/log/user-data.log` reports `connect (101: Network is unreachable)`:
+
 - Go to **VPC Console** $\rightarrow$ **Route Tables** $\rightarrow$ `public-route-table` (which has `0.0.0.0/0 -> production-igw`).
 - Ensure your ASG subnets are associated with this route table so instances can download Docker packages and pull images from Docker Hub!
 
@@ -228,13 +233,20 @@ If `/var/log/user-data.log` reports `connect (101: Network is unreachable)`:
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: Launch Template with User Data Script
+
 ![Launch Template with User Data Script](./image-2.png)
 
 ### 🖼️ Screenshot 2: Auto Scaling Group Across Multi-AZ Private Subnets
+
 ![Auto Scaling Group Across Multi-AZ Private Subnets](./image-3.png)
 
-### 🖼️ Screenshot 3: Auto-Healing Activity History
-![Auto-Healing Activity History](./image-4.png)
+### 🖼️ Screenshot 3: website working
+
+![website working](image-4.png)
+
+### 🖼️ Screenshot 4: load balancer working
+
+![load balancer working](image-7.png)
 
 ---
 
