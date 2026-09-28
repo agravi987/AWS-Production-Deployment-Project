@@ -43,11 +43,11 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 
 ## 📋 The 4-Phase Roadmap for GoDaddy (`rithulab.online`)
 
-| Phase | Where | Action | Outcome |
-| :---: | :--- | :--- | :--- |
-| **1** | **AWS Route 53** | Create Hosted Zone for `rithulab.online` | Receive 4 AWS Name Servers |
-| **2** | **GoDaddy Console** | Change Nameservers to AWS Name Servers | GoDaddy delegates DNS to Route 53 |
-| **3** | **AWS ACM** | Request Free Public SSL Certificate | SSL Certificate Issued 🟢 |
+| Phase | Where                  | Action                                   | Outcome                            |
+| :---: | :--------------------- | :--------------------------------------- | :--------------------------------- |
+| **1** | **AWS Route 53**       | Create Hosted Zone for `rithulab.online` | Receive 4 AWS Name Servers         |
+| **2** | **GoDaddy Console**    | Change Nameservers to AWS Name Servers   | GoDaddy delegates DNS to Route 53  |
+| **3** | **AWS ACM**            | Request Free Public SSL Certificate      | SSL Certificate Issued 🟢          |
 | **4** | **AWS Route 53 & ALB** | Create Alias Record & HTTPS 443 Listener | Secure HTTPS with green padlock 🔒 |
 
 ---
@@ -59,7 +59,7 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 1. Open the [Amazon Route 53 Console](https://console.aws.amazon.com/route53/).
 2. In the left navigation, click **Hosted zones** $\rightarrow$ Click **Create hosted zone**.
 3. **Hosted zone configuration**:
-   - **Domain name**: `rithulab.online` *(Enter your exact GoDaddy domain name)*.
+   - **Domain name**: `rithulab.online` _(Enter your exact GoDaddy domain name)_.
    - **Description**: `Production hosted zone for rithulab.online`.
    - **Type**: **Public hosted zone** (Default).
 4. Click **Create hosted zone**.
@@ -83,10 +83,10 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 4. Click **Change Nameservers** (or **Enter my own nameservers**).
 5. Select **I'll use my own nameservers** (Custom).
 6. Paste the **4 AWS Route 53 Name Servers** from Phase 1 into GoDaddy:
-   - *Line 1*: `ns-xxx.awsdns-xx.com` *(Remove any trailing dot at the end)*
-   - *Line 2*: `ns-xxx.awsdns-xx.net`
-   - *Line 3*: `ns-xxx.awsdns-xx.org`
-   - *Line 4*: `ns-xxx.awsdns-xx.co.uk`
+   - _Line 1_: `ns-xxx.awsdns-xx.com` _(Remove any trailing dot at the end)_
+   - _Line 2_: `ns-xxx.awsdns-xx.net`
+   - _Line 3_: `ns-xxx.awsdns-xx.org`
+   - _Line 4_: `ns-xxx.awsdns-xx.co.uk`
 7. Click **Save** $\rightarrow$ Check the confirmation box (if GoDaddy prompts for consent) $\rightarrow$ Click **Continue**.
 
 > [!TIP]
@@ -97,19 +97,19 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 ### Phase 3: Request Free SSL/TLS Certificate in AWS Certificate Manager (ACM)
 
 1. Open the [AWS Certificate Manager (ACM) Console](https://console.aws.amazon.com/acm/) in **`us-east-1`** (N. Virginia).
-   *(Make sure you are in the same region as your Load Balancer).*
+   _(Make sure you are in the same region as your Load Balancer)._
 2. Click **Request certificate** $\rightarrow$ Select **Request a public certificate** $\rightarrow$ Click **Next**.
 3. **Domain names**:
    - Primary domain: `rithulab.online`
-   - Click **Add another name to this certificate**: `*.rithulab.online` *(The asterisk covers all subdomains like `app.rithulab.online`, `api.rithulab.online`)*.
+   - Click **Add another name to this certificate**: `*.rithulab.online` _(The asterisk covers all subdomains like `app.rithulab.online`, `api.rithulab.online`)_.
 4. **Validation method**: Select **DNS validation - recommended** ✅.
 5. **Key algorithm**: `RSA 2048` (Default).
 6. Click **Request**.
-7. In the Certificates list, click on the Certificate ID you just requested (it will show Status: *Pending validation*).
+7. In the Certificates list, click on the Certificate ID you just requested (it will show Status: _Pending validation_).
 8. Under **Domains**, click the button **Create records in Route 53**:
    - A modal appears showing your domains.
    - Click **Create records**.  
-   *(AWS automatically adds the required CNAME validation records directly into your Route 53 hosted zone!)*
+     _(AWS automatically adds the required CNAME validation records directly into your Route 53 hosted zone!)_
 9. Wait ~2 to 5 minutes and refresh the page.
    - The certificate status will turn **Issued** 🟢!
 
@@ -118,6 +118,7 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 ### Phase 4: Route Domain to ALB & Enable HTTPS
 
 #### 1. Create Alias Record in Route 53
+
 1. Go back to [Route 53 Hosted zones](https://console.aws.amazon.com/route53/) $\rightarrow$ click `rithulab.online`.
 2. Click **Create record**:
    - **Record name**: Leave blank (for root `rithulab.online`) OR type `app` (for `app.rithulab.online`).
@@ -131,6 +132,7 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 3. Click **Create records**! 🎉
 
 #### 2. Add HTTPS Listener to Application Load Balancer
+
 1. Open the [EC2 Console](https://console.aws.amazon.com/ec2/) $\rightarrow$ **Load Balancers** $\rightarrow$ select `production-alb`.
 2. Select the **Listeners and rules** tab $\rightarrow$ Click **Add listener**:
    - **Protocol**: `HTTPS` | **Port**: `443`
@@ -142,6 +144,7 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
    - Click **Add**.
 
 #### 3. (Optional & Recommended) Redirect HTTP (80) to HTTPS (443)
+
 1. On the same `production-alb` **Listeners and rules** tab:
 2. Select the existing **HTTP:80** listener $\rightarrow$ Click **Manage listener** $\rightarrow$ **Edit listener**.
 3. Under **Default actions**, remove forward to `production-tg` and choose **Redirect to URL**:
@@ -156,16 +159,20 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 ## 🔍 Checkpoints: How to Verify & Test
 
 1. Open your terminal and test the redirect:
+
    ```bash
    curl -I http://rithulab.online
    ```
-   *Expected response*: `HTTP/1.1 301 Moved Permanently` $\rightarrow$ `Location: https://rithulab.online:443/`
+
+   _Expected response_: `HTTP/1.1 301 Moved Permanently` $\rightarrow$ `Location: https://rithulab.online:443/`
 
 2. Open your web browser and navigate to:
+
    ```text
    https://rithulab.online
    ```
-   *(or `https://app.rithulab.online` if you created the `app` record).*
+
+   _(or `https://app.rithulab.online` if you created the `app` record)._
 
 3. Verify:
    - The **green padlock 🔒** appears next to the URL.
@@ -177,20 +184,20 @@ You **do NOT need to buy a domain from AWS**. You can use any existing domain (f
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: Route 53 Hosted Zone with GoDaddy Name Servers
-<!-- Capture screenshot of Route 53 showing rithulab.online hosted zone and NS records -->
-`docs/screenshots/14-route53-hosted-zone-godaddy.png`
+
+![Route 53 Hosted Zone with GoDaddy Name Servers](./screenshots/20-route53-hosted-zone.png)
 
 ### 🖼️ Screenshot 2: ACM Public Certificate Issued
-<!-- Capture screenshot from ACM Console showing rithulab.online status: Issued -->
-`docs/screenshots/15-acm-ssl-issued.png`
+
+![ACM Public Certificate Issued](./screenshots/21-acm-certificate-issued.png)
 
 ### 🖼️ Screenshot 3: Application Load Balancer HTTPS:443 Listener
-<!-- Capture screenshot from ALB Listeners tab showing HTTP:80 redirect and HTTPS:443 listener -->
-`docs/screenshots/16-alb-https-listener.png`
+
+![Application Load Balancer HTTPS:443 Listener](./screenshots/22-alb-https-listener.png)
 
 ### 🖼️ Screenshot 4: Live Website with HTTPS Green Padlock
-<!-- Capture browser screenshot showing https://rithulab.online with padlock -->
-`docs/screenshots/17-live-domain-https-padlock.png`
+
+![Live Website with HTTPS Green Padlock](./screenshots/23-live-website-https.png)
 
 ---
 

@@ -7,7 +7,7 @@ This project teaches you how to design, secure, and deploy a **real-world, multi
 
 ## 🎯 Architecture Diagram & Workflow
 
-![AWS Production Deployment Workflow and Architecture Roadmap](./aws-deployment-workflow.jpg)
+![AWS Production Deployment Workflow and Architecture Roadmap](./screenshots/00-aws-deployment-workflow.jpg)
 
 ```
                             THE INTERNET 🌐

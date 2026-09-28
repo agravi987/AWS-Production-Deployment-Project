@@ -81,11 +81,11 @@ With **AWS Secrets Manager + IAM Roles**:
 
 ### 🖼️ Screenshot 1: Database Secret Stored
 
-![Database Secret Stored](image-2.png)
+![Database Secret Stored](./screenshots/09-secrets-manager-db-secret.png)
 
 ### 🖼️ Screenshot 2: IAM Role Created
 
-![IAM Role Created](image-3.png)
+![IAM Role Created](./screenshots/10-iam-role-created.png)
 
 ---
 

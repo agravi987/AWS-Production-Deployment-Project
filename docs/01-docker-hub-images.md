@@ -150,11 +150,11 @@ docker push ravi0706/devops-client:latest
 
 ### 🖼️ Screenshot 1: Docker Containers Running Locally
 
-![alt text](image-5.png)
+![alt text](./screenshots/17-docker-hub-repo-created.png)
 
 ### 🖼️ Screenshot 2: Docker Hub Repositories Pushed
 
-![alt text](image-6.png)
+![alt text](./screenshots/18-docker-hub-image-pushed.png)
 
 ---
 

@@ -8,6 +8,7 @@
 
 A production system must never fail silently.  
 With **CloudWatch + SNS**:
+
 1. CloudWatch monitors EC2 CPU utilization every 60 seconds.
 2. If average CPU exceeds 70%, it fires an alarm.
 3. Amazon SNS sends an immediate incident email to your phone or team!
@@ -17,17 +18,19 @@ With **CloudWatch + SNS**:
 ## 🖱️ Step-by-Step AWS Console Recipe
 
 ### 1. Create SNS Topic for Email Alerts
+
 1. Open the [Amazon SNS Console](https://console.aws.amazon.com/sns/) $\rightarrow$ click **Topics** $\rightarrow$ Click **Create topic**.
 2. Type: **Standard** | Name: `production-devops-alerts` $\rightarrow$ Click **Create topic**.
 3. Under **Subscriptions**, click **Create subscription**:
    - Protocol: **Email**
    - Endpoint: Enter your personal email address.
    - Click **Create subscription**.
-4. 📩 **Check your email inbox!** Click **Confirm subscription** in the confirmation email from AWS. *(Status turns Confirmed)*!
+4. 📩 **Check your email inbox!** Click **Confirm subscription** in the confirmation email from AWS. _(Status turns Confirmed)_!
 
 ---
 
 ### 2. Create CloudWatch CPU Alarm
+
 1. Open the [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/) $\rightarrow$ click **All alarms** $\rightarrow$ Click **Create alarm**.
 2. Click **Select metric** $\rightarrow$ **EC2** $\rightarrow$ **By Auto Scaling Group** $\rightarrow$ select `production-asg` $\rightarrow$ choose **CPUUtilization**.
 3. Conditions:
@@ -42,6 +45,7 @@ With **CloudWatch + SNS**:
 ---
 
 ### 3. Create CloudWatch Dashboard
+
 1. In CloudWatch, click **Dashboards** $\rightarrow$ Click **Create dashboard**.
 2. Name: `production-overview-dashboard`.
 3. Add Widgets:
@@ -55,6 +59,7 @@ With **CloudWatch + SNS**:
 ## 🔍 Checkpoints: How to Test Your Alarm Live!
 
 Want to see your alarm trigger with a real spike?
+
 1. Connect to one of your running EC2 instances via EC2 Instance Connect.
 2. Run a CPU load generator:
    ```bash
@@ -71,13 +76,16 @@ Want to see your alarm trigger with a real spike?
 ## 📸 Proof of Work: Screenshots
 
 ### 🖼️ Screenshot 1: CloudWatch CPU Alarm Configured
-`docs/screenshots/20-cloudwatch-cpu-alarm.png`
+
+![CloudWatch CPU Alarm Configured](./screenshots/26-cloudwatch-cpu-alarm.png)
 
 ### 🖼️ Screenshot 2: Amazon SNS Subscription Confirmed
-`docs/screenshots/21-sns-email-confirmed.png`
+
+![Amazon SNS Subscription Confirmed](./screenshots/25-sns-subscription-confirmed.png)
 
 ### 🖼️ Screenshot 3: CloudWatch Live Overview Dashboard
-`docs/screenshots/22-cloudwatch-dashboard-live.png`
+
+![CloudWatch Live Overview Dashboard](./screenshots/24-cloudwatch-dashboard.png)
 
 ---
 

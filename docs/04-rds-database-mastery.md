@@ -87,11 +87,11 @@ In production, running a database inside a temporary EC2 container is dangerous�
 
 ### 🖼️ Screenshot 1: RDS DB Subnet Group
 
-![RDS DB Subnet Group](image.png)
+![RDS DB Subnet Group](./screenshots/07-rds-db-subnet-group.png)
 
 ### 🖼️ Screenshot 2: Amazon RDS Instance Available
 
-![Amazon RDS Instance Available](image-1.png)
+![Amazon RDS Instance Available](./screenshots/08-rds-instance-available.png)
 
 ---
 

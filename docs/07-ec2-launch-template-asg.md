@@ -234,19 +234,19 @@ If `/var/log/user-data.log` reports `connect (101: Network is unreachable)`:
 
 ### 🖼️ Screenshot 1: Launch Template with User Data Script
 
-![Launch Template with User Data Script](./image-2.png)
+![Launch Template with User Data Script](./screenshots/14-ec2-launch-template.png)
 
 ### 🖼️ Screenshot 2: Auto Scaling Group Across Multi-AZ Private Subnets
 
-![Auto Scaling Group Across Multi-AZ Private Subnets](./image-3.png)
+![Auto Scaling Group Across Multi-AZ Private Subnets](./screenshots/15-asg-instances-healthy.png)
 
 ### 🖼️ Screenshot 3: website working
 
-![website working](image-4.png)
+![website working](./screenshots/13-alb-active.png)
 
 ### 🖼️ Screenshot 4: load balancer working
 
-![load balancer working](image-7.png)
+![load balancer working](./screenshots/16-asg-self-healing-activity.png)
 
 ---
 
